@@ -1,6 +1,6 @@
-﻿namespace SocialMedia.Core.Entities;
+﻿namespace SocialMedia.Core.DTOs.Comments;
 
-public class Comment
+public class CommentDTO
 {
     public int Id { get; set; }
     public int PostId { get; set; }
@@ -8,6 +8,4 @@ public class Comment
     public string? Description { get; set; }
     public DateTime Date { get; set; }
     public bool Active { get; set; }
-    public virtual Post? Post { get; set; }
-    public virtual User? User { get; set; }
 }

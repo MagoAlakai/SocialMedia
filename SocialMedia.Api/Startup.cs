@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SocialMedia.Infrastructure.Data;
+﻿using AutoMapper;
 
 namespace SocialMedia.Api;
 
@@ -19,6 +18,10 @@ public class Startup
 
         services.AddControllers();
 
+        services.AddAutoMapper(typeof(Infrastructure.Mapping.Comments.AutoMapperProfiles));
+        services.AddAutoMapper(typeof(Infrastructure.Mapping.Posts.AutoMapperProfiles));
+        services.AddAutoMapper(typeof(Infrastructure.Mapping.Users.AutoMapperProfiles));
+
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
 
@@ -35,7 +38,7 @@ public class Startup
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SocialMedia v1"));
         }
-
+       
         // Configure the HTTP request pipeline.
 
         app.UseHttpsRedirection();
