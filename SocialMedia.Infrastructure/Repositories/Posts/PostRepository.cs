@@ -1,7 +1,7 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Infrastructure.Data;
-
+using System.Security.Cryptography.X509Certificates;
 
 namespace SocialMedia.Infrastructure.Repositories.Posts;
 
@@ -26,14 +26,40 @@ public class PostRepository : IPostRepository
         return await Task.FromResult(post_dto_list);
     }
 
-    public async Task<PostDTO> GetByIdAsync(int id)
+    public async Task<PostWithUserAndCommentsDTO> GetByIdAsync(int id)
     {
         Post? post = await _applicationDbContext.Posts.Where(x => x.Id == id).FirstOrDefaultAsync();
-        if (post is null) { return new PostDTO(); }
+        if (post is null) { return new PostWithUserAndCommentsDTO(); }
 
-        PostDTO post_dto = _mapper.Map<PostDTO>(post);
+        User? user = await _applicationDbContext.Users.Where(x => x.Id == post.UserId).FirstOrDefaultAsync();
+        if (user is null) { return new PostWithUserAndCommentsDTO(); }
 
-        return await Task.FromResult(post_dto);
+        List<Comment> comments = new ();
+        comments = _applicationDbContext.Comments
+            .Where(x => x.UserId == post.UserId && x.Active == true)
+            .Select(x => new Comment() 
+            { 
+                Id = x.Id,
+                Description = x.Description,
+                Date = x.Date,
+                Active = x.Active,
+                PostId = x.Id,
+                UserId = x.UserId,
+                User = x.User,
+                Post = x.Post
+            })
+            .ToList();
+
+        UserDTO user_dto = _mapper.Map<UserDTO>(user);
+
+        PostWithUserAndCommentsDTO post_with_user_dto = _mapper.Map<Post, PostWithUserAndCommentsDTO>(post, options =>
+               options.AfterMap((src, dest) => {
+                   dest.User = user_dto;
+                   dest.Comments = comments;
+               }));
+
+
+        return await Task.FromResult(post_with_user_dto);
     }
 
     public async Task<PostDTO?> PostAsync(CreatePostDTO create_post_dto)
@@ -41,7 +67,15 @@ public class PostRepository : IPostRepository
         bool post_exist = await _applicationDbContext.Posts.AnyAsync(x => x.Description == create_post_dto.Description);
         if (post_exist is true) { return null; }
 
-        Post? post = _mapper.Map<Post>(create_post_dto);
+        User? user = await _applicationDbContext.Users.Where(x => x.Id == create_post_dto.UserId).FirstOrDefaultAsync();
+
+        Post? post = _mapper.Map<CreatePostDTO ,Post>(create_post_dto, options =>
+        {
+            options.AfterMap((src, dest) =>
+            {
+                dest.User = user;
+            });
+        });
 
         _applicationDbContext.Add(post);
         await _applicationDbContext.SaveChangesAsync();

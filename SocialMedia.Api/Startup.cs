@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-
-namespace SocialMedia.Api;
+﻿namespace SocialMedia.Api;
 
 public class Startup
 {
@@ -16,17 +14,19 @@ public class Startup
             options.UseSqlServer(_configurations.GetConnectionString(nameof(ApplicationDbContext)),
             x => x.MigrationsAssembly("SocialMedia.Infrastructure")));
 
-        services.AddControllers();
+        services.AddControllers().AddNewtonsoftJson(options =>
+        {
+            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+        });
 
-        services.AddAutoMapper(typeof(Infrastructure.Mapping.Comments.AutoMapperProfiles));
-        services.AddAutoMapper(typeof(Infrastructure.Mapping.Posts.AutoMapperProfiles));
-        services.AddAutoMapper(typeof(Infrastructure.Mapping.Users.AutoMapperProfiles));
+        services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
 
         //Add Repositories
         services.AddTransient<IPostRepository, PostRepository>();
+        services.AddTransient<IUserRepository, UserRepository>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
