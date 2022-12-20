@@ -1,6 +1,6 @@
 ﻿namespace SocialMedia.Core.DTOs.Users;
 
-public class UserDTO
+public class UserWithPostsAndCommentsDTO
 {
     public int Id { get; set; }
     public string? Name { get; set; }
@@ -9,4 +9,6 @@ public class UserDTO
     public DateTime BirthDate { get; set; }
     public string? PhoneNumber { get; set; }
     public bool Active { get; set; }
+    public virtual ICollection<CommentSimplifiedDTO>? Comments { get; set; }
+    public virtual ICollection<PostSimplifiedDTO>? Posts { get; set; }
 }

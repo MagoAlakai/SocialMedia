@@ -1,9 +1,4 @@
-﻿
-using Microsoft.EntityFrameworkCore;
-using SocialMedia.Infrastructure.Data;
-using System.Security.Cryptography.X509Certificates;
-
-namespace SocialMedia.Infrastructure.Repositories.Posts;
+﻿namespace SocialMedia.Infrastructure.Repositories.Posts;
 
 public class PostRepository : IPostRepository
 {
@@ -34,23 +29,17 @@ public class PostRepository : IPostRepository
         User? user = await _applicationDbContext.Users.Where(x => x.Id == post.UserId).FirstOrDefaultAsync();
         if (user is null) { return new PostWithUserAndCommentsDTO(); }
 
-        List<Comment> comments = new ();
+        List<CommentSimplifiedDTO> comments = new ();
         comments = _applicationDbContext.Comments
             .Where(x => x.UserId == post.UserId && x.Active == true)
-            .Select(x => new Comment() 
+            .Select(x => new CommentSimplifiedDTO() 
             { 
                 Id = x.Id,
                 Description = x.Description,
-                Date = x.Date,
-                Active = x.Active,
-                PostId = x.Id,
-                UserId = x.UserId,
-                User = x.User,
-                Post = x.Post
             })
             .ToList();
 
-        UserDTO user_dto = _mapper.Map<UserDTO>(user);
+        UserSimplifiedDTO user_dto = _mapper.Map<UserSimplifiedDTO>(user);
 
         PostWithUserAndCommentsDTO post_with_user_dto = _mapper.Map<Post, PostWithUserAndCommentsDTO>(post, options =>
                options.AfterMap((src, dest) => {

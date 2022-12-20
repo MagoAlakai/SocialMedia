@@ -7,6 +7,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<Comment, CreateCommentDTO>();
         CreateMap<Comment, CommentDTO>();
         CreateMap<CommentDTO, Comment>();
+        CreateMap<Comment, CommentSimplifiedDTO>();
     }
 }
 

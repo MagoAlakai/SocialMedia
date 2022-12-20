@@ -2,6 +2,6 @@
 
 public class PostWithUserAndCommentsDTO : PostDTO
 {
-    public UserDTO? User { get; set; }
-    public ICollection<Comment>? Comments { get; set; }
+    public UserSimplifiedDTO? User { get; set; }
+    public ICollection<CommentSimplifiedDTO>? Comments { get; set; }
 }
