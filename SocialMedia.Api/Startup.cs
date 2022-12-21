@@ -10,6 +10,11 @@ public class Startup
     {
         // Add services to the container.
 
+        services.Configure<ApiBehaviorOptions>(options =>
+        {
+            options.SuppressModelStateInvalidFilter = true;
+        });
+
         services.AddDbContext<ApplicationDbContext>(options => 
             options.UseSqlServer(_configurations.GetConnectionString(nameof(ApplicationDbContext)),
             x => x.MigrationsAssembly("SocialMedia.Infrastructure")));
@@ -27,6 +32,10 @@ public class Startup
         //Add Repositories
         services.AddTransient<IPostRepository, PostRepository>();
         services.AddTransient<IUserRepository, UserRepository>();
+
+        //Add Validators
+        services.AddScoped<IValidator<CreatePostDTO>, PostValidator>();
+        services.AddScoped<IValidator<CreateUserDTO>, UserValidator>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

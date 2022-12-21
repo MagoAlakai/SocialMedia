@@ -1,15 +1,16 @@
-﻿using SocialMedia.Core.DTOs.Users;
-
-namespace SocialMedia.Api.Controllers;
+﻿namespace SocialMedia.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
 public class UserController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
-    public UserController(IUserRepository userRepository)
+    private readonly IValidator<CreateUserDTO> _validator;
+
+    public UserController(IUserRepository userRepository, IValidator<CreateUserDTO> validator)
     {
         _userRepository = userRepository;
+        _validator = validator;
     }
 
     //GET https://localhost:7022/api/user
@@ -52,6 +53,13 @@ public class UserController : ControllerBase
     {
         try
         {
+            ValidationResult validation = await _validator.ValidateAsync(create_user_dto);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
             UserDTO? result = await _userRepository.PostAsync(create_user_dto);
             if (result is null) { return BadRequest($"This user is already registered"); }
 
@@ -69,6 +77,13 @@ public class UserController : ControllerBase
     {
         try
         {
+            ValidationResult validation = await _validator.ValidateAsync(update_user_dto);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
             UserDTO? result = await _userRepository.UpdateAsync(update_user_dto, id);
             if (result is null) { return BadRequest($"This user is not registered"); }
 

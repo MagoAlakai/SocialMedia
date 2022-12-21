@@ -1,7 +1,4 @@
-﻿using SocialMedia.Core.DTOs.Posts;
-using SocialMedia.Infrastructure.Data;
-
-namespace SocialMedia.Infrastructure.Repositories.Users;
+﻿namespace SocialMedia.Infrastructure.Repositories.Users;
 
 public class UserRepository : IUserRepository
 {

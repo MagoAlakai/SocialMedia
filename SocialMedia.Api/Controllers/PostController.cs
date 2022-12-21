@@ -1,14 +1,20 @@
-﻿namespace SocialMedia.Api.Controllers;
+﻿using FluentValidation.Results;
+using SocialMedia.Core.DTOs.Posts;
+using SocialMedia.Core.DTOs.Users;
+
+namespace SocialMedia.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
 public class PostController : ControllerBase
 {
     private readonly IPostRepository _postRepository;
+    private readonly IValidator<CreatePostDTO> _validator;
 
-    public PostController(IPostRepository postRepository)
+    public PostController(IPostRepository postRepository, IValidator<CreatePostDTO> validator)
     {
         _postRepository = postRepository;
+        _validator = validator;
     }
 
     //GET https://localhost:7022/api/post
@@ -51,6 +57,13 @@ public class PostController : ControllerBase
     {
         try
         {
+            ValidationResult validation = await _validator.ValidateAsync(create_post_dto);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
             PostDTO? result = await _postRepository.PostAsync(create_post_dto);
             if (result is null) { return BadRequest($"This post is already registered"); }
 
@@ -68,6 +81,13 @@ public class PostController : ControllerBase
     {
         try
         {
+            ValidationResult validation = await _validator.ValidateAsync(update_post_dto);
+
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
             PostDTO? result = await _postRepository.UpdateAsync(update_post_dto, id);
             if (result is null) { return BadRequest($"This post is not registered"); }
 

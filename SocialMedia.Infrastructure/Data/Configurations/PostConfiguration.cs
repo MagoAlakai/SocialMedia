@@ -24,6 +24,7 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
         builder.HasOne(e => e.User)
             .WithMany(x => x.Posts)
             .HasForeignKey(e => e.UserId)
+            .HasPrincipalKey(x => x.Id)
             .OnDelete(DeleteBehavior.Cascade)
             .HasConstraintName("FK_Post_User");
     }
