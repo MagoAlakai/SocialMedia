@@ -1,14 +1,12 @@
 ﻿namespace SocialMedia.Core.Entities;
 
-public class User
+public class User : BaseEntity
 {
     public User()
     {
         Comments = new HashSet<Comment>();
         Posts = new HashSet<Post>();
     }
-
-    public int Id { get; set; }
     public string? Name { get; set; }
     public string? LastName { get; set; }
     public string? Email { get; set; }

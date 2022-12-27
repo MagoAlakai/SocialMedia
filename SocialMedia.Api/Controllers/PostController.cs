@@ -1,6 +1,4 @@
-﻿using FluentValidation.Results;
-using SocialMedia.Core.DTOs.Posts;
-using SocialMedia.Core.DTOs.Users;
+﻿using SocialMedia.Core.Interfaces.Post;
 
 namespace SocialMedia.Api.Controllers;
 
@@ -8,12 +6,12 @@ namespace SocialMedia.Api.Controllers;
 [ApiController]
 public class PostController : ControllerBase
 {
-    private readonly IPostRepository _postRepository;
+    private readonly IPostService _postService;
     private readonly IValidator<CreatePostDTO> _validator;
 
-    public PostController(IPostRepository postRepository, IValidator<CreatePostDTO> validator)
+    public PostController(IPostService postService, IValidator<CreatePostDTO> validator)
     {
-        _postRepository = postRepository;
+        _postService = postService;
         _validator = validator;
     }
 
@@ -23,7 +21,7 @@ public class PostController : ControllerBase
     {
         try
         {
-            IEnumerable<PostDTO> result = await _postRepository.GetAsync();
+            IEnumerable<PostDTO> result = await _postService.GetAsync();
             if (result is null) { return BadRequest($"There are no posts registered yet"); }
 
             return StatusCode(200, result);
@@ -40,7 +38,7 @@ public class PostController : ControllerBase
     {
         try
         {
-            PostDTO result = await _postRepository.GetByIdAsync(id);
+            PostDTO result = await _postService.GetByIdAsync(id);
             if (result is null) { return BadRequest($"This post is not registered"); }
 
             return StatusCode(200, result);
@@ -64,7 +62,7 @@ public class PostController : ControllerBase
                 return BadRequest(validation.Errors);
             }
 
-            PostDTO? result = await _postRepository.PostAsync(create_post_dto);
+            PostDTO? result = await _postService.PostAsync(create_post_dto);
             if (result is null) { return BadRequest($"This post is already registered"); }
 
             return StatusCode(200, result);
@@ -88,7 +86,7 @@ public class PostController : ControllerBase
                 return BadRequest(validation.Errors);
             }
 
-            PostDTO? result = await _postRepository.UpdateAsync(update_post_dto, id);
+            PostDTO? result = await _postService.UpdateAsync(update_post_dto, id);
             if (result is null) { return BadRequest($"This post is not registered"); }
 
             return StatusCode(200, result);
@@ -105,7 +103,7 @@ public class PostController : ControllerBase
     {
         try
         {
-            bool result = await _postRepository.DeleteAsync(id);
+            bool result = await _postService.DeleteAsync(id);
             if (result is false) { return BadRequest($"This post is not registered"); }
 
             return StatusCode(200, result);

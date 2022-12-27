@@ -12,8 +12,8 @@ using SocialMedia.Infrastructure.Data;
 namespace SocialMedia.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20221220175900_PrincipalKeyUser")]
-    partial class PrincipalKeyUser
+    [Migration("20221223001320_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

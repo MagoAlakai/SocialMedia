@@ -1,4 +1,9 @@
-﻿namespace SocialMedia.Api;
+﻿using SocialMedia.Core.Interfaces.Post;
+using SocialMedia.Core.Interfaces.UnitOfWork;
+using SocialMedia.Core.Interfaces.User;
+using SocialMedia.Infrastructure.Repositories.UnitOfWork;
+
+namespace SocialMedia.Api;
 
 public class Startup
 {
@@ -29,7 +34,12 @@ public class Startup
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
 
+        //Add services
+        services.AddTransient<IPostService, PostService>();
+        services.AddTransient<IUserService, UserService>();
+
         //Add Repositories
+        services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
         services.AddTransient<IPostRepository, PostRepository>();
         services.AddTransient<IUserRepository, UserRepository>();
 

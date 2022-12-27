@@ -1,4 +1,6 @@
-﻿namespace SocialMedia.Infrastructure.Repositories.Posts;
+﻿using SocialMedia.Core.Interfaces.Post;
+
+namespace SocialMedia.Infrastructure.Repositories.Posts;
 
 public class PostRepository : IPostRepository
 {

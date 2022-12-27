@@ -1,4 +1,4 @@
-﻿namespace SocialMedia.Infrastructure.Repositories.Posts;
+﻿namespace SocialMedia.Core.Interfaces.Post;
 public interface IPostRepository
 {
     public Task<IEnumerable<PostDTO>> GetAsync();

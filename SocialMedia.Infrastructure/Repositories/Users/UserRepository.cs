@@ -1,4 +1,6 @@
-﻿namespace SocialMedia.Infrastructure.Repositories.Users;
+﻿using SocialMedia.Core.Interfaces.User;
+
+namespace SocialMedia.Infrastructure.Repositories.Users;
 
 public class UserRepository : IUserRepository
 {

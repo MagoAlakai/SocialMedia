@@ -1,5 +1,4 @@
-﻿namespace SocialMedia.Infrastructure.Repositories.Users;
-
+﻿namespace SocialMedia.Core.Interfaces.User;
 public interface IUserRepository
 {
     public Task<IEnumerable<UserDTO>> GetAsync();

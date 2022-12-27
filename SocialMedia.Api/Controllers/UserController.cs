@@ -1,15 +1,17 @@
-﻿namespace SocialMedia.Api.Controllers;
+﻿using SocialMedia.Core.Interfaces.User;
+
+namespace SocialMedia.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
 public class UserController : ControllerBase
 {
-    private readonly IUserRepository _userRepository;
+    private readonly IUserService _userService;
     private readonly IValidator<CreateUserDTO> _validator;
 
-    public UserController(IUserRepository userRepository, IValidator<CreateUserDTO> validator)
+    public UserController(IUserService userService, IValidator<CreateUserDTO> validator)
     {
-        _userRepository = userRepository;
+        _userService = userService;
         _validator = validator;
     }
 
@@ -19,7 +21,7 @@ public class UserController : ControllerBase
     {
         try
         {
-            IEnumerable<UserDTO> result = await _userRepository.GetAsync();
+            IEnumerable<UserDTO> result = await _userService.GetAsync();
             if (result is null) { return BadRequest($"There are no users registered yet"); }
 
             return StatusCode(200, result);
@@ -36,7 +38,7 @@ public class UserController : ControllerBase
     {
         try
         {
-            UserWithPostsAndCommentsDTO result = await _userRepository.GetByIdAsync(id);
+            UserWithPostsAndCommentsDTO result = await _userService.GetByIdAsync(id);
             if (result is null) { return BadRequest($"This user is not registered"); }
 
             return StatusCode(200, result);
@@ -60,7 +62,7 @@ public class UserController : ControllerBase
                 return BadRequest(validation.Errors);
             }
 
-            UserDTO? result = await _userRepository.PostAsync(create_user_dto);
+            UserDTO? result = await _userService.PostAsync(create_user_dto);
             if (result is null) { return BadRequest($"This user is already registered"); }
 
             return StatusCode(200, result);
@@ -84,7 +86,7 @@ public class UserController : ControllerBase
                 return BadRequest(validation.Errors);
             }
 
-            UserDTO? result = await _userRepository.UpdateAsync(update_user_dto, id);
+            UserDTO? result = await _userService.UpdateAsync(update_user_dto, id);
             if (result is null) { return BadRequest($"This user is not registered"); }
 
             return StatusCode(200, result);
@@ -101,7 +103,7 @@ public class UserController : ControllerBase
     {
         try
         {
-            bool result = await _userRepository.DeleteAsync(id);
+            bool result = await _userService.DeleteAsync(id);
             if (result is false) { return BadRequest($"This user is not registered"); }
 
             return StatusCode(200, result);
