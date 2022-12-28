@@ -11,5 +11,6 @@ public class AutoMapperProfiles : Profile
         CreateMap<Post, PostDTO>();
         CreateMap<PostDTO, Post>();
         CreateMap<Post, PostWithUserAndCommentsDTO>();
+        CreateMap<Post, PostSimplifiedDTO>();
     }
 }

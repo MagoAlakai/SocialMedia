@@ -1,8 +1,4 @@
-﻿using SocialMedia.Core.Interfaces.Post;
-using SocialMedia.Core.Interfaces.UnitOfWork;
-using SocialMedia.Core.Interfaces.User;
-
-namespace SocialMedia.Infrastructure.Repositories.UnitOfWork;
+﻿namespace SocialMedia.Infrastructure.Repositories.UnitOfWork;
 
 public class UnitOfWork : IUnitOfWork
 {
@@ -10,7 +6,7 @@ public class UnitOfWork : IUnitOfWork
     private readonly IMapper _mapper;
     private readonly IPostRepository? _postRepository;
     private readonly IUserRepository? _userRepository;
-
+    private readonly ICommentRepository? _commentRepository;
     public UnitOfWork(ApplicationDbContext applicationDbContext, IMapper mapper)
     {
         _applicationDbContext = applicationDbContext;
@@ -19,6 +15,7 @@ public class UnitOfWork : IUnitOfWork
 
     public IPostRepository postRepository => _postRepository ?? new PostRepository(_applicationDbContext, _mapper);
     public IUserRepository userRepository => _userRepository ?? new UserRepository(_applicationDbContext, _mapper);
+    public ICommentRepository commentRepository => _commentRepository ?? new CommentRepository(_applicationDbContext, _mapper);
 
     public void Dispose()
     {

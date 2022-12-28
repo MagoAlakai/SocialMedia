@@ -5,8 +5,8 @@ public class AutoMapperProfiles : Profile
     {
         CreateMap<CreateCommentDTO, Comment>();
         CreateMap<Comment, CreateCommentDTO>();
-        CreateMap<Comment, CommentDTO>();
-        CreateMap<CommentDTO, Comment>();
+        CreateMap<Comment, CommentWithUserAndPostDTO>();
+        CreateMap<CommentWithUserAndPostDTO, Comment>();
         CreateMap<Comment, CommentSimplifiedDTO>();
     }
 }

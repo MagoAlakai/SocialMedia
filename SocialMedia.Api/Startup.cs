@@ -1,9 +1,4 @@
-﻿using SocialMedia.Core.Interfaces.Post;
-using SocialMedia.Core.Interfaces.UnitOfWork;
-using SocialMedia.Core.Interfaces.User;
-using SocialMedia.Infrastructure.Repositories.UnitOfWork;
-
-namespace SocialMedia.Api;
+﻿namespace SocialMedia.Api;
 
 public class Startup
 {
@@ -37,15 +32,18 @@ public class Startup
         //Add services
         services.AddTransient<IPostService, PostService>();
         services.AddTransient<IUserService, UserService>();
+        services.AddTransient<ICommentService, CommentService>();
 
         //Add Repositories
         services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
         services.AddTransient<IPostRepository, PostRepository>();
         services.AddTransient<IUserRepository, UserRepository>();
+        services.AddTransient<ICommentRepository, CommentRepository>();
 
         //Add Validators
         services.AddScoped<IValidator<CreatePostDTO>, PostValidator>();
         services.AddScoped<IValidator<CreateUserDTO>, UserValidator>();
+        services.AddScoped<IValidator<CreateCommentDTO>, CommentValidator>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

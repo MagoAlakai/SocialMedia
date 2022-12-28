@@ -3,7 +3,7 @@ public interface IUnitOfWork : IDisposable
 {
     IPostRepository postRepository { get; }
     IUserRepository userRepository { get; }
-    //IUserRepository commentRepository { get; }
+    ICommentRepository commentRepository { get; }
 
     void SaveChanges();
     Task SaveChangesAsync();

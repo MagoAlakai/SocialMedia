@@ -1,4 +1,4 @@
-﻿namespace SocialMedia.Infrastructure.Validators;
+﻿namespace SocialMedia.Infrastructure.Validators.Users;
 
 public class UserValidator : AbstractValidator<CreateUserDTO>
 {
