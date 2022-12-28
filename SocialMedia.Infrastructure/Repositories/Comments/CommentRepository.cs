@@ -64,8 +64,7 @@ public class CommentRepository : ICommentRepository
             });
         });
 
-        _applicationDbContext.Add(comment);
-        await _applicationDbContext.SaveChangesAsync();
+        await _applicationDbContext.AddAsync(comment);
 
         CommentDTO? comment_dto = _mapper.Map<CommentDTO>(comment);
 
@@ -86,7 +85,6 @@ public class CommentRepository : ICommentRepository
         });
 
         _applicationDbContext.Update(comment);
-        await _applicationDbContext.SaveChangesAsync();
 
         CommentDTO? comment_dto = _mapper.Map<CommentDTO>(comment);
 
@@ -99,7 +97,6 @@ public class CommentRepository : ICommentRepository
         if (comment is null) { return false; }
 
         _applicationDbContext.Remove(comment);
-        await _applicationDbContext.SaveChangesAsync();
 
         return true;
     }

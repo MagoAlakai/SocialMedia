@@ -1,4 +1,6 @@
-﻿namespace SocialMedia.Core.Services;
+﻿using SocialMedia.Core.DTOs.Comments;
+
+namespace SocialMedia.Core.Services;
 
 public class CommentService : ICommentService
 {
@@ -20,16 +22,25 @@ public class CommentService : ICommentService
 
     public async Task<CommentDTO?> PostAsync(CreateCommentDTO post)
     {
-        return await _unitOfWork.commentRepository.PostAsync(post);
+        CommentDTO? comment_dto = await _unitOfWork.commentRepository.PostAsync(post);
+        await _unitOfWork.SaveChangesAsync();
+
+        return comment_dto;
     }
 
     public async Task<CommentDTO?> UpdateAsync(CreateCommentDTO post, int id)
     {
-        return await _unitOfWork.commentRepository.UpdateAsync(post, id);
+        CommentDTO? comment_dto = await _unitOfWork.commentRepository.UpdateAsync(post, id);
+        await _unitOfWork.SaveChangesAsync();
+
+        return comment_dto;
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
-        return await _unitOfWork.commentRepository.DeleteAsync(id);
+        bool deleted = await _unitOfWork.commentRepository.DeleteAsync(id);
+        await _unitOfWork.SaveChangesAsync();
+
+        return deleted;
     }
 }

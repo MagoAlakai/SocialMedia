@@ -60,7 +60,7 @@ public class PostRepository : IPostRepository
 
         User? user = await _applicationDbContext.Users.Where(x => x.Id == create_post_dto.UserId).FirstOrDefaultAsync();
 
-        Post? post = _mapper.Map<CreatePostDTO ,Post>(create_post_dto, options =>
+        Post post = _mapper.Map<CreatePostDTO ,Post>(create_post_dto, options =>
         {
             options.AfterMap((src, dest) =>
             {
@@ -68,8 +68,7 @@ public class PostRepository : IPostRepository
             });
         });
 
-        _applicationDbContext.Add(post);
-        await _applicationDbContext.SaveChangesAsync();
+        await _applicationDbContext.AddAsync(post);
 
         PostDTO? post_dto = _mapper.Map<PostDTO>(post);
 
@@ -88,7 +87,6 @@ public class PostRepository : IPostRepository
         }));
 
         _applicationDbContext.Update(post);
-        await _applicationDbContext.SaveChangesAsync();
 
         PostDTO? post_dto = _mapper.Map<PostDTO>(post);
 
@@ -101,7 +99,6 @@ public class PostRepository : IPostRepository
         if (post is null) { return false; }
 
         _applicationDbContext.Remove(post);
-        await _applicationDbContext.SaveChangesAsync();
 
         return true;
     }

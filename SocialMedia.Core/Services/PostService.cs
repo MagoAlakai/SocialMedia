@@ -1,4 +1,6 @@
-﻿namespace SocialMedia.Core.Services;
+﻿using SocialMedia.Core.DTOs.Posts;
+
+namespace SocialMedia.Core.Services;
 
 public class PostService : IPostService
 {
@@ -27,16 +29,25 @@ public class PostService : IPostService
             throw new Exception("User does not exist");
         }
 
-        return await _unitOfWork.postRepository.PostAsync(create_post_dto);
+        PostDTO? post_dto = await _unitOfWork.postRepository.PostAsync(create_post_dto);
+        await _unitOfWork.SaveChangesAsync();
+
+        return post_dto;
     }
 
     public async Task<PostDTO?> UpdateAsync(CreatePostDTO create_post_dto, int id)
     {
-        return await _unitOfWork.postRepository.UpdateAsync(create_post_dto, id);
+        PostDTO ? post_dto = await _unitOfWork.postRepository.UpdateAsync(create_post_dto, id);
+        await _unitOfWork.SaveChangesAsync();
+
+        return post_dto;
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
-        return await _unitOfWork.postRepository.DeleteAsync(id);
+        bool deleted = await _unitOfWork.postRepository.DeleteAsync(id);
+        await _unitOfWork.SaveChangesAsync();
+
+        return deleted;
     }
 }

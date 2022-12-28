@@ -64,8 +64,7 @@ public class UserRepository : IUserRepository
         User? user = _mapper.Map<User>(create_user_dto);
         if (user == null) { return null;}
 
-        _applicationDbContext.Add(user);
-        await _applicationDbContext.SaveChangesAsync();
+        await _applicationDbContext.AddAsync(user);
 
         UserDTO? user_dto = _mapper.Map<UserDTO>(user);
 
@@ -84,7 +83,6 @@ public class UserRepository : IUserRepository
         }));
 
         _applicationDbContext.Update(user);
-        await _applicationDbContext.SaveChangesAsync();
 
         UserDTO? user_dto = _mapper.Map<UserDTO>(user);
 
@@ -97,7 +95,6 @@ public class UserRepository : IUserRepository
     if (user is null) { return false; }
 
     _applicationDbContext.Remove(user);
-    await _applicationDbContext.SaveChangesAsync();
 
     return true;
     }
