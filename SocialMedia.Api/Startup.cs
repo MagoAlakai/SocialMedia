@@ -62,6 +62,8 @@ public class Startup
             });
         });
 
+        services.AddApplicationInsightsTelemetry(opt => opt.EnableActiveTelemetryConfigurationSetup = true);
+
         //Configure Authentication with Bearer and JWT, and policies from ServiceCollectionExtension
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -96,12 +98,9 @@ public class Startup
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        if (env.IsDevelopment())
-        {
-            app.UseDeveloperExceptionPage();
-            app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SocialMedia v1"));
-        }
+        app.UseDeveloperExceptionPage();
+        app.UseSwagger();
+        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SocialMedia v1"));
        
         // Configure the HTTP request pipeline.
 
