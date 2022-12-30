@@ -1,6 +1,4 @@
-﻿using SocialMedia.Core.Interfaces.Post;
-
-namespace SocialMedia.Api.Controllers;
+﻿namespace SocialMedia.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -8,51 +6,93 @@ public class PostController : ControllerBase
 {
     private readonly IPostService _postService;
     private readonly IValidator<CreatePostDTO> _validator;
+    private readonly IMapper _mapper;
 
-    public PostController(IPostService postService, IValidator<CreatePostDTO> validator)
+    public PostController(IPostService postService, IValidator<CreatePostDTO> validator, IMapper mapper)
     {
         _postService = postService;
         _validator = validator;
+        _mapper = mapper;
     }
 
-    //GET https://localhost:7022/api/post
+    /// <summary>
+    /// Retrieve all the exisiting posts
+    /// </summary>
+    /// <remarks>GET https://localhost:7022/api/post</remarks>
+    /// <returns>A list of PostDTO</returns>
     [HttpGet]
     public async Task<IActionResult> GetPosts()
     {
         try
         {
-            IEnumerable<PostDTO> result = await _postService.GetAsync();
+            IEnumerable<Post> result = await _postService.GetAsync();
             if (result is null) { return BadRequest($"There are no posts registered yet"); }
 
-            return StatusCode(200, result);
+            List<PostDTO> post_dto_list = new(_mapper.Map<IEnumerable<PostDTO>>(result));
+
+            return StatusCode(200, post_dto_list);
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex.Message));
+            return await Task.FromResult(BadRequest(ex));
         }
     }
 
-    //GET https://localhost:7022/api/post/{id}
+    /// <summary>
+    /// Get details fom specific Post, with User and Comments
+    /// </summary>
+    /// <param name="id">Id from the Post</param>
+    /// <remarks>GET https://localhost:7022/api/post/{id}</remarks>
+    /// <returns>A PostDTO</returns>
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
         try
         {
-            PostDTO result = await _postService.GetByIdAsync(id);
+            Post? result = await _postService.GetByIdAsync(id);
             if (result is null) { return BadRequest($"This post is not registered"); }
 
-            return StatusCode(200, result);
+            UserSimplifiedDTO user_dto = _mapper.Map<UserSimplifiedDTO>(result.User);
+
+            List<CommentSimplifiedDTO> comments_dto = _mapper.Map<List<CommentSimplifiedDTO>>(result.Comments);
+
+            PostWithUserAndCommentsDTO post_with_user_dto = _mapper.Map<Post, PostWithUserAndCommentsDTO>(result, options =>
+                   options.AfterMap((src, dest) =>
+                   {
+                       dest.User = user_dto;
+                       dest.Comments = comments_dto;
+                   }));
+
+            return StatusCode(200, post_with_user_dto);
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex.Message));
+            return await Task.FromResult(BadRequest(ex));
         }
     }
 
-    //POST https://localhost:7022/api/post/
+    /// <summary>
+    /// Create a new Post
+    /// </summary>
+    /// <param name="create_post_dto"></param>
+    /// <remarks>POST https://localhost:7022/api/post/</remarks>
+    /// <returns>A StatusCode and the PostDTO</returns>
     [HttpPost]
-    public async Task<IActionResult> PostPost(CreatePostDTO create_post_dto)
+    public async Task<IActionResult> Post(CreatePostDTO create_post_dto)
     {
+
+        //ValidationResult validation = await _validator.ValidateAsync(create_post_dto);
+
+        //if (!validation.IsValid)
+        //{
+        //    return BadRequest(validation.Errors);
+        //}
+
+        //PostDTO? result = await _postService.PostAsync(create_post_dto);
+        //if (result is null) { return BadRequest($"This post is already registered"); }
+
+        //return Ok(result);
+
         try
         {
             ValidationResult validation = await _validator.ValidateAsync(create_post_dto);
@@ -62,18 +102,27 @@ public class PostController : ControllerBase
                 return BadRequest(validation.Errors);
             }
 
-            PostDTO? result = await _postService.PostAsync(create_post_dto);
+            Post post = _mapper.Map<Post>(create_post_dto);
+            Post? result = await _postService.PostAsync(post);
             if (result is null) { return BadRequest($"This post is already registered"); }
 
-            return StatusCode(200, result);
+            PostDTO? post_dto = _mapper.Map<PostDTO>(result);
+
+            return StatusCode(200, post_dto);
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex.Message));
+            return await Task.FromResult(BadRequest(ex));
         }
     }
 
-    //PUT https://localhost:7022/api/post/{id}
+    /// <summary>
+    /// Update a Post
+    /// </summary>
+    /// <param name="update_post_dto"></param>
+    /// <param name="id"></param>
+    /// <remarks>PUT https://localhost:7022/api/post/{id}</remarks>
+    /// <returns>A StatusCode and the PostDTO</returns>
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(CreatePostDTO update_post_dto, int id)
     {
@@ -86,18 +135,26 @@ public class PostController : ControllerBase
                 return BadRequest(validation.Errors);
             }
 
-            PostDTO? result = await _postService.UpdateAsync(update_post_dto, id);
+            Post? post = _mapper.Map<Post>(update_post_dto);
+            Post? result = await _postService.UpdateAsync(post, id);
             if (result is null) { return BadRequest($"This post is not registered"); }
 
-            return StatusCode(200, result);
+            PostDTO? post_dto = _mapper.Map<PostDTO>(result);
+
+            return StatusCode(200, post_dto);
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex.Message));
+            return await Task.FromResult(BadRequest(ex));
         }
     }
 
-    //DELETE https://localhost:7022/api/post/{id}
+    /// <summary>
+    /// Delete a Post
+    /// </summary>
+    /// <param name="id"></param>
+    /// <remarks>DELETE https://localhost:7022/api/post/{id}</remarks>
+    /// <returns>A boolean</returns>
     [HttpDelete("{id:int}")]
     public async Task<ActionResult> Delete(int id)
     {
@@ -110,7 +167,7 @@ public class PostController : ControllerBase
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex.Message));
+            return await Task.FromResult(BadRequest(ex));
         }
     }
 }

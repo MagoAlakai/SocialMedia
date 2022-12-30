@@ -1,6 +1,4 @@
-﻿using SocialMedia.Core.Interfaces.User;
-
-namespace SocialMedia.Api.Controllers;
+﻿namespace SocialMedia.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -8,48 +6,77 @@ public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
     private readonly IValidator<CreateUserDTO> _validator;
+    private readonly IMapper _mapper;
 
-    public UserController(IUserService userService, IValidator<CreateUserDTO> validator)
+    public UserController(IUserService userService, IValidator<CreateUserDTO> validator, IMapper mapper)
     {
         _userService = userService;
         _validator = validator;
+        _mapper = mapper;
     }
 
-    //GET https://localhost:7022/api/user
+    /// <summary>
+    /// Get all the Users
+    /// </summary>
+    /// <remarks>GET https://localhost:7022/api/user</remarks>
+    /// <returns>A list of Users</returns>
     [HttpGet]
     public async Task<IActionResult> Get()
     {
         try
         {
-            IEnumerable<UserDTO> result = await _userService.GetAsync();
+            IEnumerable<User> result = await _userService.GetAsync();
             if (result is null) { return BadRequest($"There are no users registered yet"); }
 
-            return StatusCode(200, result);
+            List<UserDTO> user_dto_list = new(_mapper.Map<IEnumerable<UserDTO>>(result));
+
+            return StatusCode(200, user_dto_list);
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex.Message));
+            return await Task.FromResult(BadRequest(ex));
         }
     }
 
-    //GET https://localhost:7022/api/user/{id}
+    /// <summary>
+    /// Get details from a User, with Posts and Comments
+    /// </summary>
+    /// <param name="id"></param>
+    /// <remarks>GET https://localhost:7022/api/user/{id}</remarks>
+    /// <returns>A UserWithPostsAndCommentsDTO</returns>
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
         try
         {
-            UserWithPostsAndCommentsDTO result = await _userService.GetByIdAsync(id);
+            User? result = await _userService.GetByIdAsync(id);
             if (result is null) { return BadRequest($"This user is not registered"); }
 
-            return StatusCode(200, result);
+            List<CommentSimplifiedDTO> comments_dto = _mapper.Map<List<CommentSimplifiedDTO>>(result.Comments);
+
+            List<PostSimplifiedDTO> posts_dto = _mapper.Map<List<PostSimplifiedDTO>>(result.Posts);
+
+            UserWithPostsAndCommentsDTO user_with_posts_and_comments_dto = _mapper.Map<User, UserWithPostsAndCommentsDTO>(result, options =>
+                   options.AfterMap((src, dest) =>
+                   {
+                       dest.Posts = posts_dto;
+                       dest.Comments = comments_dto;
+                   }));
+
+            return StatusCode(200, user_with_posts_and_comments_dto);
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex.Message));
+            return await Task.FromResult(BadRequest(ex));
         }
     }
 
-    //POST https://localhost:7022/api/user
+    /// <summary>
+    /// Create a User
+    /// </summary>
+    /// <param name="create_user_dto"></param>
+    /// <remarks>POST https://localhost:7022/api/user</remarks>
+    /// <returns>A StatusCode and the UserDTO</returns>
     [HttpPost]
     public async Task<IActionResult> Post(CreateUserDTO create_user_dto)
     {
@@ -62,18 +89,27 @@ public class UserController : ControllerBase
                 return BadRequest(validation.Errors);
             }
 
-            UserDTO? result = await _userService.PostAsync(create_user_dto);
+            User? user = _mapper.Map<User>(create_user_dto);
+            User? result = await _userService.PostAsync(user);
             if (result is null) { return BadRequest($"This user is already registered"); }
 
-            return StatusCode(200, result);
+            UserDTO? user_dto = _mapper.Map<UserDTO>(result);
+
+            return StatusCode(200, user_dto);
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex.Message));
+            return await Task.FromResult(BadRequest(ex));
         }
     }
 
-    //PUT https://localhost:7022/api/user/{id}
+    /// <summary>
+    /// Update a User
+    /// </summary>
+    /// <param name="update_user_dto"></param>
+    /// <param name="id"></param>
+    /// <remarks>PUT https://localhost:7022/api/user/{id}</remarks>
+    /// <returns>A StatusCode and the UserDTO</returns>
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(CreateUserDTO update_user_dto, int id)
     {
@@ -86,18 +122,26 @@ public class UserController : ControllerBase
                 return BadRequest(validation.Errors);
             }
 
-            UserDTO? result = await _userService.UpdateAsync(update_user_dto, id);
+            User? user = _mapper.Map<User>(update_user_dto);
+            User? result = await _userService.UpdateAsync(user, id);
             if (result is null) { return BadRequest($"This user is not registered"); }
 
-            return StatusCode(200, result);
+            UserDTO? user_dto = _mapper.Map<UserDTO>(result);
+
+            return StatusCode(200, user_dto);
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex.Message));
+            return await Task.FromResult(BadRequest(ex));
         }
     }
 
-    //DELETE https://localhost:7022/api/user/{id}
+    /// <summary>
+    /// Delete a User
+    /// </summary>
+    /// <param name="id"></param>
+    /// <remarks>DELETE https://localhost:7022/api/user/{id}</remarks>
+    /// <returns>A boolean</returns>
     [HttpDelete("{id:int}")]
     public async Task<ActionResult> Delete(int id)
     {
@@ -110,7 +154,7 @@ public class UserController : ControllerBase
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex.Message));
+            return await Task.FromResult(BadRequest(ex));
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using SocialMedia.Core.DTOs.Comments;
+using SocialMedia.Core.Entities;
 
 namespace SocialMedia.Core.Services;
 
@@ -10,30 +11,46 @@ public class CommentService : ICommentService
     {
         _unitOfWork = unitOfWork;
     }
-    public async Task<IEnumerable<CommentDTO>> GetAsync()
+    public async Task<IEnumerable<Comment>> GetAsync()
     {
         return await _unitOfWork.commentRepository.GetAsync();
     }
 
-    public async Task<CommentWithUserAndPostDTO> GetByIdAsync(int id)
+    public async Task<Comment?> GetByIdAsync(int id)
     {
-        return await _unitOfWork.commentRepository.GetByIdAsync(id);
+        Comment? comment = await _unitOfWork.commentRepository.GetByIdAsync(id);
+        if (comment is null) { return new Comment(); }
+
+        Post? post = await _unitOfWork.postRepository.GetByIdAsync(comment.PostId);
+        if (post is null) { return new Comment(); }
+
+        User? user = await _unitOfWork.userRepository.GetByIdAsync(comment.UserId);
+        if (user is null) { return new Comment(); }
+
+        comment.User = user;
+        comment.Post = post;
+
+        return comment;
     }
 
-    public async Task<CommentDTO?> PostAsync(CreateCommentDTO post)
+    public async Task<Comment?> PostAsync(Comment create_comment)
     {
-        CommentDTO? comment_dto = await _unitOfWork.commentRepository.PostAsync(post);
+        Comment? comment = await _unitOfWork.commentRepository.PostAsync(create_comment);
+        if (comment is null) { return null; }
+
         await _unitOfWork.SaveChangesAsync();
 
-        return comment_dto;
+        return comment;
     }
 
-    public async Task<CommentDTO?> UpdateAsync(CreateCommentDTO post, int id)
+    public async Task<Comment?> UpdateAsync(Comment update_comment, int id)
     {
-        CommentDTO? comment_dto = await _unitOfWork.commentRepository.UpdateAsync(post, id);
+        Comment? comment = await _unitOfWork.commentRepository.UpdateAsync(update_comment, id);
+        if (comment is null) { return null; }
+
         await _unitOfWork.SaveChangesAsync();
 
-        return comment_dto;
+        return comment;
     }
 
     public async Task<bool> DeleteAsync(int id)

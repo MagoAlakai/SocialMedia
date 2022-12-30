@@ -3,19 +3,17 @@
 public class UnitOfWork : IUnitOfWork
 {
     private readonly ApplicationDbContext _applicationDbContext;
-    private readonly IMapper _mapper;
-    private readonly IPostRepository? _postRepository;
-    private readonly IUserRepository? _userRepository;
-    private readonly ICommentRepository? _commentRepository;
-    public UnitOfWork(ApplicationDbContext applicationDbContext, IMapper mapper)
+    private readonly IRepository<Post>? _postRepository;
+    private readonly IRepository<User>? _userRepository;
+    private readonly IRepository<Comment>? _commentRepository;
+    public UnitOfWork(ApplicationDbContext applicationDbContext)
     {
         _applicationDbContext = applicationDbContext;
-        _mapper = mapper;
     }
 
-    public IPostRepository postRepository => _postRepository ?? new PostRepository(_applicationDbContext, _mapper);
-    public IUserRepository userRepository => _userRepository ?? new UserRepository(_applicationDbContext, _mapper);
-    public ICommentRepository commentRepository => _commentRepository ?? new CommentRepository(_applicationDbContext, _mapper);
+    public IRepository<Post> postRepository => _postRepository ?? new BaseRepository<Post>(_applicationDbContext);
+    public IRepository<User> userRepository => _userRepository ?? new BaseRepository<User>(_applicationDbContext);
+    public IRepository<Comment> commentRepository => _commentRepository ?? new BaseRepository<Comment>(_applicationDbContext);
 
     public void Dispose()
     {

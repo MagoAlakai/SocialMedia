@@ -10,40 +10,33 @@ public class Startup
     {
         // Add services to the container.
 
-        services.Configure<ApiBehaviorOptions>(options =>
-        {
-            options.SuppressModelStateInvalidFilter = true;
-        });
+        // Add DbContext from ServiceCollectionExtension
+        services.AddApplicationDbContext(_configurations);
 
-        services.AddDbContext<ApplicationDbContext>(options => 
-            options.UseSqlServer(_configurations.GetConnectionString(nameof(ApplicationDbContext)),
-            x => x.MigrationsAssembly("SocialMedia.Infrastructure")));
-
-        services.AddControllers().AddNewtonsoftJson(options =>
+        services.AddControllers(options => 
         {
+            options.Filters.Add<GlobalExceptionFilter>();
+        })
+        .AddNewtonsoftJson(options =>
+        { 
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
         });
 
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
+        services.AddSwaggerGen( options =>
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo { Title = "SocialMedia Api", Version = "v1" });
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            options.IncludeXmlComments(xmlPath, true);
+        });
 
-        //Add services
-        services.AddTransient<IPostService, PostService>();
-        services.AddTransient<IUserService, UserService>();
-        services.AddTransient<ICommentService, CommentService>();
-
-        //Add Repositories
-        services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
-        services.AddTransient<IPostRepository, PostRepository>();
-        services.AddTransient<IUserRepository, UserRepository>();
-        services.AddTransient<ICommentRepository, CommentRepository>();
-
-        //Add Validators
-        services.AddScoped<IValidator<CreatePostDTO>, PostValidator>();
-        services.AddScoped<IValidator<CreateUserDTO>, UserValidator>();
-        services.AddScoped<IValidator<CreateCommentDTO>, CommentValidator>();
+        // Add from ServiceCollectionExtension
+        services.AddServices();
+        services.AddRepositories();
+        services.AddValidators();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

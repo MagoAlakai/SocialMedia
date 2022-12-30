@@ -1,6 +1,4 @@
-﻿using SocialMedia.Core.DTOs.Posts;
-
-namespace SocialMedia.Core.Services;
+﻿namespace SocialMedia.Core.Services;
 
 public class PostService : IPostService
 {
@@ -11,36 +9,63 @@ public class PostService : IPostService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IEnumerable<PostDTO>> GetAsync()
+    public async Task<IEnumerable<Post>> GetAsync()
     {
         return await _unitOfWork.postRepository.GetAsync();
     }
 
-    public async Task<PostWithUserAndCommentsDTO> GetByIdAsync(int id)
+    public async Task<Post?> GetByIdAsync(int id)
     {
-        return await _unitOfWork.postRepository.GetByIdAsync(id);
+        Post? post = await _unitOfWork.postRepository.GetByIdAsync(id);
+        if (post is null) { return new Post(); }
+
+        User? user = await _unitOfWork.userRepository.GetByIdAsync(post.UserId);
+        if (user is null) { return new Post(); }
+
+        List<Comment> comments = new();
+        comments = _unitOfWork.commentRepository.GetAsync().Result
+            .Where(x => x.UserId == post.UserId && x.Active == true)
+            .Select(x => new Comment()
+            {
+                Id = x.Id,
+                Description = x.Description,
+                Active = x.Active,
+                Date = x.Date,
+                PostId = x.PostId,
+                UserId = user.Id
+            })
+            .ToList();
+
+        post.User = user;
+        post.Comments = comments;
+        return post;
     }
 
-    public async Task<PostDTO?> PostAsync(CreatePostDTO create_post_dto)
+    public async Task<Post?> PostAsync(Post create_post)
     {
-        var user = await _unitOfWork.userRepository.GetByIdAsync(create_post_dto.UserId);
-        if (user.Id is 0)
+        User? user = await _unitOfWork.userRepository.GetByIdAsync(create_post.UserId);
+        if (user?.Id is 0)
         {
-            throw new Exception("User does not exist");
+            throw new BusinessException("User does not exist");
         }
 
-        PostDTO? post_dto = await _unitOfWork.postRepository.PostAsync(create_post_dto);
+        Post? post = await _unitOfWork.postRepository.PostAsync(create_post);
+        if (post is null) { return null; }
+        post.User = user;
+
         await _unitOfWork.SaveChangesAsync();
 
-        return post_dto;
+        return post;
     }
 
-    public async Task<PostDTO?> UpdateAsync(CreatePostDTO create_post_dto, int id)
+    public async Task<Post?> UpdateAsync(Post create_post, int id)
     {
-        PostDTO ? post_dto = await _unitOfWork.postRepository.UpdateAsync(create_post_dto, id);
+        Post? post = await _unitOfWork.postRepository.UpdateAsync(create_post, id);
+        if (post is null) { return null; }
+
         await _unitOfWork.SaveChangesAsync();
 
-        return post_dto;
+        return post;
     }
 
     public async Task<bool> DeleteAsync(int id)

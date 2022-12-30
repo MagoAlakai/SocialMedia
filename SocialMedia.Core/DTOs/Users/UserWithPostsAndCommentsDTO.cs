@@ -1,5 +1,8 @@
 ﻿namespace SocialMedia.Core.DTOs.Users;
 
+/// <summary>
+/// DTO to display the User with Posts and Comments
+/// </summary>
 public class UserWithPostsAndCommentsDTO
 {
     public int Id { get; set; }
