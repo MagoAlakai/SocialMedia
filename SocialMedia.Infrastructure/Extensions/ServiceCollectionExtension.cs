@@ -25,5 +25,6 @@ public static class ServiceCollectionExtension
         services.AddTransient<IPostService, PostService>();
         services.AddTransient<IUserService, UserService>();
         services.AddTransient<ICommentService, CommentService>();
+        services.AddTransient<IIdentityService, IdentityService>();
     }
 }

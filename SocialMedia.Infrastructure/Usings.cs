@@ -1,5 +1,6 @@
 ﻿global using AutoMapper;
 global using FluentValidation;
+global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.Filters;
 global using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ global using SocialMedia.Core.Entities;
 global using SocialMedia.Core.Exceptions;
 global using SocialMedia.Core.Interfaces;
 global using SocialMedia.Core.Interfaces.Comment;
+global using SocialMedia.Core.Interfaces.Identity;
 global using SocialMedia.Core.Interfaces.Post;
 global using SocialMedia.Core.Interfaces.UnitOfWork;
 global using SocialMedia.Core.Interfaces.User;
@@ -26,4 +28,3 @@ global using SocialMedia.Infrastructure.Validators.Comments;
 global using SocialMedia.Infrastructure.Validators.Posts;
 global using SocialMedia.Infrastructure.Validators.Users;
 global using System.Net;
-

@@ -1,6 +1,7 @@
 ﻿namespace SocialMedia.Api.Controllers;
 
 [Route("api/[controller]")]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "IsAdmin")]
 [ApiController]
 public class UserController : ControllerBase
 {
@@ -21,7 +22,7 @@ public class UserController : ControllerBase
     /// <remarks>GET https://localhost:7022/api/user</remarks>
     /// <returns>A list of Users</returns>
     [HttpGet]
-    public async Task<IActionResult> Get()
+    public async Task<ActionResult<IEnumerable<User>>> Get()
     {
         try
         {
@@ -45,7 +46,7 @@ public class UserController : ControllerBase
     /// <remarks>GET https://localhost:7022/api/user/{id}</remarks>
     /// <returns>A UserWithPostsAndCommentsDTO</returns>
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id)
+    public async Task<ActionResult<UserWithPostsAndCommentsDTO>> GetById(int id)
     {
         try
         {
@@ -78,7 +79,7 @@ public class UserController : ControllerBase
     /// <remarks>POST https://localhost:7022/api/user</remarks>
     /// <returns>A StatusCode and the UserDTO</returns>
     [HttpPost]
-    public async Task<IActionResult> Post(CreateUserDTO create_user_dto)
+    public async Task<ActionResult<UserDTO>> Post(CreateUserDTO create_user_dto)
     {
         try
         {
@@ -111,7 +112,7 @@ public class UserController : ControllerBase
     /// <remarks>PUT https://localhost:7022/api/user/{id}</remarks>
     /// <returns>A StatusCode and the UserDTO</returns>
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(CreateUserDTO update_user_dto, int id)
+    public async Task<ActionResult<UserDTO>> Update(CreateUserDTO update_user_dto, int id)
     {
         try
         {
@@ -143,7 +144,7 @@ public class UserController : ControllerBase
     /// <remarks>DELETE https://localhost:7022/api/user/{id}</remarks>
     /// <returns>A boolean</returns>
     [HttpDelete("{id:int}")]
-    public async Task<ActionResult> Delete(int id)
+    public async Task<ActionResult<bool>> Delete(int id)
     {
         try
         {

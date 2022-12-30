@@ -1,9 +1,7 @@
-﻿using SocialMedia.Core.DTOs.Comments;
-using SocialMedia.Core.Entities;
-
-namespace SocialMedia.Api.Controllers;
+﻿namespace SocialMedia.Api.Controllers;
 
 [Route("api/comment")]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 [ApiController]
 public class CommentController : ControllerBase
 {
@@ -24,7 +22,8 @@ public class CommentController : ControllerBase
     /// <remarks>GET https://localhost:7022/api/comment</remarks>
     /// <returns>A list of Comments</returns>
     [HttpGet]
-    public async Task<IActionResult> GetComments()
+    [AllowAnonymous]
+    public async Task<ActionResult<IEnumerable<CommentDTO>>> GetComments()
     {
         try
         {
@@ -48,7 +47,8 @@ public class CommentController : ControllerBase
     /// <remarks>GET https://localhost:7022/api/comment/{id}</remarks>
     /// <returns>A CommentWithUserAndPostDTO</returns>
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id)
+    [AllowAnonymous]
+    public async Task<ActionResult<CommentWithUserAndPostDTO>> GetById(int id)
     {
         try
         {
@@ -79,7 +79,7 @@ public class CommentController : ControllerBase
     /// <remarks>POST https://localhost:7022/api/comment/</remarks>
     /// <returns>A StatusCode and a CommentDTO</returns>
     [HttpPost]
-    public async Task<IActionResult> Post(CreateCommentDTO create_comment_dto)
+    public async Task<ActionResult<CommentDTO>> Post(CreateCommentDTO create_comment_dto)
     {
         try
         {
@@ -112,7 +112,7 @@ public class CommentController : ControllerBase
     /// <remarks>PUT https://localhost:7022/api/comment/{id}</remarks>
     /// <returns>A StatusCode and a CommentDTO</returns>
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(CreateCommentDTO update_comment_dto, int id)
+    public async Task<ActionResult<CommentDTO>> Update(CreateCommentDTO update_comment_dto, int id)
     {
         try
         {
@@ -144,7 +144,7 @@ public class CommentController : ControllerBase
     /// <remarks>DELETE https://localhost:7022/api/comment/{id}</remarks>
     /// <returns>A boolean</returns>
     [HttpDelete("{id:int}")]
-    public async Task<ActionResult> Delete(int id)
+    public async Task<ActionResult<bool>> Delete(int id)
     {
         try
         {

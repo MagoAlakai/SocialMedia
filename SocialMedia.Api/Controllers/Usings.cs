@@ -1,16 +1,25 @@
 ﻿global using AutoMapper;
 global using FluentValidation;
 global using FluentValidation.Results;
+global using Microsoft.AspNetCore.Authentication.JwtBearer;
+global using Microsoft.AspNetCore.Authorization;
+global using Microsoft.AspNetCore.DataProtection;
+global using Microsoft.AspNetCore.Identity;
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.IdentityModel.Tokens;
 global using Microsoft.OpenApi.Models;
+global using SocialMedia.Core.Data;
 global using SocialMedia.Core.DTOs.Comments;
+global using SocialMedia.Core.DTOs.Identity;
 global using SocialMedia.Core.DTOs.Posts;
 global using SocialMedia.Core.DTOs.Users;
 global using SocialMedia.Core.Entities;
 global using SocialMedia.Core.Interfaces.Comment;
+global using SocialMedia.Core.Interfaces.Identity;
 global using SocialMedia.Core.Interfaces.Post;
 global using SocialMedia.Core.Interfaces.User;
 global using SocialMedia.Infrastructure.Extensions;
 global using SocialMedia.Infrastructure.Filters;
 global using System.Reflection;
-
+global using System.Security.Claims;
+global using System.Text;

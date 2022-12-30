@@ -1,4 +1,6 @@
-﻿namespace SocialMedia.Api;
+﻿using SocialMedia.Infrastructure.Data;
+
+namespace SocialMedia.Api;
 
 public class Startup
 {
@@ -24,6 +26,10 @@ public class Startup
 
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+        services.AddIdentity<IdentityUser, IdentityRole>()
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
+
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen( options =>
         {
@@ -31,6 +37,54 @@ public class Startup
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             options.IncludeXmlComments(xmlPath, true);
+
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header
+            });
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    new string[]{}
+                }
+            });
+        });
+
+        //Configure Authentication with Bearer and JWT, and policies from ServiceCollectionExtension
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                string? SecretKey = _configurations["Authentication:SecretKey"];
+                if (string.IsNullOrEmpty(SecretKey)){ throw new ArgumentException($"{nameof(SecretKey)} must contain value."); };
+                byte[] jwtkey_byte_array = Encoding.UTF8.GetBytes(SecretKey);
+
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = _configurations["Authentication:Issuer"],
+                    ValidAudience = _configurations["Authentication:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(jwtkey_byte_array),
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("IsAdmin", policy => policy.RequireClaim("isAdmin"));
         });
 
         // Add from ServiceCollectionExtension
@@ -61,6 +115,7 @@ public class Startup
         app.UseRouting();
         app.UseCors();
         app.UseAuthorization();
+        app.UseAuthentication();
 
         app.UseResponseCaching();
         app.UseEndpoints(endpoints =>

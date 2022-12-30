@@ -1,6 +1,7 @@
 ﻿namespace SocialMedia.Api.Controllers;
 
 [Route("api/[controller]")]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 [ApiController]
 public class PostController : ControllerBase
 {
@@ -21,7 +22,8 @@ public class PostController : ControllerBase
     /// <remarks>GET https://localhost:7022/api/post</remarks>
     /// <returns>A list of PostDTO</returns>
     [HttpGet]
-    public async Task<IActionResult> GetPosts()
+    [AllowAnonymous]
+    public async Task<ActionResult<IEnumerable<PostDTO>>> GetPosts()
     {
         try
         {
@@ -45,7 +47,8 @@ public class PostController : ControllerBase
     /// <remarks>GET https://localhost:7022/api/post/{id}</remarks>
     /// <returns>A PostDTO</returns>
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id)
+    [AllowAnonymous]
+    public async Task<ActionResult<PostWithUserAndCommentsDTO>> GetById(int id)
     {
         try
         {
@@ -78,7 +81,7 @@ public class PostController : ControllerBase
     /// <remarks>POST https://localhost:7022/api/post/</remarks>
     /// <returns>A StatusCode and the PostDTO</returns>
     [HttpPost]
-    public async Task<IActionResult> Post(CreatePostDTO create_post_dto)
+    public async Task<ActionResult<PostDTO>> Post(CreatePostDTO create_post_dto)
     {
 
         //ValidationResult validation = await _validator.ValidateAsync(create_post_dto);
@@ -124,7 +127,7 @@ public class PostController : ControllerBase
     /// <remarks>PUT https://localhost:7022/api/post/{id}</remarks>
     /// <returns>A StatusCode and the PostDTO</returns>
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(CreatePostDTO update_post_dto, int id)
+    public async Task<ActionResult<PostDTO>> Update(CreatePostDTO update_post_dto, int id)
     {
         try
         {
@@ -156,7 +159,7 @@ public class PostController : ControllerBase
     /// <remarks>DELETE https://localhost:7022/api/post/{id}</remarks>
     /// <returns>A boolean</returns>
     [HttpDelete("{id:int}")]
-    public async Task<ActionResult> Delete(int id)
+    public async Task<ActionResult<bool>> Delete(int id)
     {
         try
         {

@@ -1,6 +1,6 @@
 ﻿namespace SocialMedia.Infrastructure.Data;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : IdentityDbContext
 {
     public ApplicationDbContext()
     {
@@ -34,10 +34,10 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.ApplyConfiguration(new CommentConfiguration());
-
         modelBuilder.ApplyConfiguration(new PostConfiguration());
-
         modelBuilder.ApplyConfiguration(new UserConfiguration());
     }
 }
