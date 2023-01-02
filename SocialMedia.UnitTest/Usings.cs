@@ -1,12 +1,11 @@
 global using AutoFixture;
 global using AutoMapper;
-global using FluentValidation;
 global using Microsoft.VisualStudio.TestTools.UnitTesting;
 global using Moq;
-global using SocialMedia.Api.Controllers;
 global using SocialMedia.Core.Data;
 global using SocialMedia.Core.DTOs.Posts;
 global using SocialMedia.Core.Entities;
 global using SocialMedia.Core.Interfaces.UnitOfWork;
 global using SocialMedia.Core.Services;
+global using SocialMedia.Infrastructure.Mapping.Posts;
 global using System.Text.Json;

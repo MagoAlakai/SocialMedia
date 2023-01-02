@@ -35,7 +35,14 @@ public class PostController : ControllerBase
             ValidatedResult<IEnumerable<Post>> result = await _postService.GetAsync();
             if (result.Success is false) { return BadRequest($"There are no posts registered yet"); }
 
-            List<PostDTO> post_dto_list = new(_mapper.Map<IEnumerable<PostDTO>>(result.Value));
+            //List<PostDTO> post_dto_list = new(_mapper.Map<IEnumerable<PostDTO>>(result.Value));
+
+            List<PostDTO> post_dto_list = new();
+            foreach (Post post in result.Value)
+            {
+                PostDTO post_dto = _mapper.Map<PostDTO>(post);
+                post_dto_list.Add(post_dto);
+            }
 
             return StatusCode(200, ValidatedResult<IEnumerable<PostDTO>>.Passed(post_dto_list));
         }

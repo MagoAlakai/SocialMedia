@@ -18,6 +18,7 @@ public class PostControllerUnitTests
         _unit = new Mock<IUnitOfWork>();
         _fixture = new Fixture();
     }
+
     private void ConsoleWriteObject(string prefix, object? obj)
     {
         string str_json = JsonSerializer.Serialize(obj, _json_serializer_options);
