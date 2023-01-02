@@ -1,5 +1,4 @@
-﻿global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-global using Microsoft.AspNetCore.Identity;
+﻿global using Microsoft.AspNetCore.Identity;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.IdentityModel.Tokens;
@@ -17,6 +16,5 @@ global using SocialMedia.Core.Interfaces.UnitOfWork;
 global using SocialMedia.Core.Interfaces.User;
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Security.Claims;
-global using System.Security.Cryptography;
 global using System.Text;
 

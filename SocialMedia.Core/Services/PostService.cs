@@ -9,9 +9,12 @@ public class PostService : IPostService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IEnumerable<Post>> GetAsync()
+    public async Task<ValidatedResult<IEnumerable<Post>>> GetAsync()
     {
-        return await _unitOfWork.postRepository.GetAsync();
+        IEnumerable<Post>? result = await _unitOfWork.postRepository.GetAsync();
+        if (result.Any() is false) { return ValidatedResult<IEnumerable<Post>>.Failed(0, "There are no Posts registered"); }
+
+        return ValidatedResult<IEnumerable<Post>>.Passed(result);
     }
 
     public async Task<Post?> GetByIdAsync(int id)
@@ -37,17 +40,17 @@ public class PostService : IPostService
             .ToList();
 
         post.User = user;
-        post.Comments = comments;
+        //post.Comments = comments;
         return post;
     }
 
     public async Task<Post?> PostAsync(Post create_post)
     {
         User? user = await _unitOfWork.userRepository.GetByIdAsync(create_post.UserId);
-        if (user?.Id is 0)
-        {
-            throw new BusinessException("User does not exist");
-        }
+        //if (user is null)
+        //{
+        //    throw new BusinessException("User does not exist");
+        //}
 
         Post? post = await _unitOfWork.postRepository.PostAsync(create_post);
         if (post is null) { return null; }

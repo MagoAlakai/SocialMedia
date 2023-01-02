@@ -1,4 +1,7 @@
-﻿namespace SocialMedia.Api.Controllers;
+﻿using SocialMedia.Core.Data;
+using System.Collections.Generic;
+
+namespace SocialMedia.Api.Controllers;
 
 [Route("api/[controller]")]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "IsAdmin")]
@@ -22,16 +25,16 @@ public class UserController : ControllerBase
     /// <remarks>GET https://localhost:7022/api/user</remarks>
     /// <returns>A list of Users</returns>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<User>>> Get()
+    public async Task<ActionResult<ValidatedResult<IEnumerable<UserDTO>>>> Get()
     {
         try
         {
-            IEnumerable<User> result = await _userService.GetAsync();
-            if (result is null) { return BadRequest($"There are no users registered yet"); }
+            ValidatedResult<IEnumerable<User>> result = await _userService.GetAsync();
+            if (result.Success is false) { return BadRequest($"There are no users registered yet"); }
 
             List<UserDTO> user_dto_list = new(_mapper.Map<IEnumerable<UserDTO>>(result));
 
-            return StatusCode(200, user_dto_list);
+            return StatusCode(200, ValidatedResult<IEnumerable<UserDTO>>.Passed(user_dto_list));
         }
         catch (Exception ex)
         {

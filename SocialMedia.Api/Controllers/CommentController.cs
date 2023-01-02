@@ -1,4 +1,7 @@
-﻿namespace SocialMedia.Api.Controllers;
+﻿using SocialMedia.Core.Data;
+using System.Collections.Generic;
+
+namespace SocialMedia.Api.Controllers;
 
 [Route("api/comment")]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -23,16 +26,16 @@ public class CommentController : ControllerBase
     /// <returns>A list of Comments</returns>
     [HttpGet]
     [AllowAnonymous]
-    public async Task<ActionResult<IEnumerable<CommentDTO>>> GetComments()
+    public async Task<ActionResult<ValidatedResult<IEnumerable<CommentDTO>>>> GetComments()
     {
         try
         {
-            IEnumerable<Comment> result = await _commentService.GetAsync();
-            if (result is null) { return BadRequest($"There are no comments registered yet"); }
+            ValidatedResult<IEnumerable<Comment>> result = await _commentService.GetAsync();
+            if (result.Success is false) { return BadRequest($"There are no comments registered yet"); }
 
             List<CommentDTO> comment_dto_list = new(_mapper.Map<IEnumerable<CommentDTO>>(result));
 
-            return StatusCode(200, comment_dto_list);
+            return StatusCode(200, ValidatedResult<IEnumerable<CommentDTO>>.Passed(comment_dto_list));
         }
         catch (Exception ex)
         {

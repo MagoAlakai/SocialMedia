@@ -9,9 +9,12 @@ public class UserService : IUserService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IEnumerable<User>> GetAsync()
+    public async Task<ValidatedResult<IEnumerable<User>>> GetAsync()
     {
-        return await _unitOfWork.userRepository.GetAsync();
+        IEnumerable<User>? result = await _unitOfWork.userRepository.GetAsync();
+        if (result is null) { return ValidatedResult<IEnumerable<User>>.Failed(0, "There are no Users registered"); }
+
+        return ValidatedResult<IEnumerable<User>>.Passed(result);
     }
 
     public async Task<User?> GetByIdAsync(int id)
@@ -19,7 +22,7 @@ public class UserService : IUserService
         User? user = await _unitOfWork.userRepository.GetByIdAsync(id);
         if (user is null) { return new User(); }
 
-        List<Post> posts = new ();
+        List<Post> posts = new();
         posts = _unitOfWork.postRepository.GetAsync().Result
             .Where(x => x.UserId == user.Id)
             .Select(x => new Post()
@@ -41,7 +44,7 @@ public class UserService : IUserService
                 Id = x.Id,
                 Description = x.Description,
                 Active = x.Active,
-                Date = x.Date,   
+                Date = x.Date,
                 PostId = x.PostId,
                 UserId = user.Id
             })

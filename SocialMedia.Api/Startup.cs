@@ -1,6 +1,4 @@
-﻿using SocialMedia.Infrastructure.Data;
-
-namespace SocialMedia.Api;
+﻿namespace SocialMedia.Api;
 
 public class Startup
 {
@@ -10,89 +8,24 @@ public class Startup
     // This method gets called by the runtime. Use this method to configure the services.
     public void ConfigureServices(IServiceCollection services)
     {
-        // Add services to the container.
-
-        // Add DbContext from ServiceCollectionExtension
-        services.AddApplicationDbContext(_configurations);
-
-        services.AddControllers(options => 
-        {
-            options.Filters.Add<GlobalExceptionFilter>();
-        })
-        .AddNewtonsoftJson(options =>
-        { 
-            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-        });
+    // Add services to the container.
 
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
-        services.AddIdentity<IdentityUser, IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders();
-
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen( options =>
-        {
-            options.SwaggerDoc("v1", new OpenApiInfo { Title = "SocialMedia Api", Version = "v1" });
-            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-            options.IncludeXmlComments(xmlPath, true);
-
-            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Name = "Authorization",
-                Type = SecuritySchemeType.ApiKey,
-                Scheme = "Bearer",
-                BearerFormat = "JWT",
-                In = ParameterLocation.Header
-            });
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    new string[]{}
-                }
-            });
-        });
-
         services.AddApplicationInsightsTelemetry(opt => opt.EnableActiveTelemetryConfigurationSetup = true);
 
-        //Configure Authentication with Bearer and JWT, and policies from ServiceCollectionExtension
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                string? SecretKey = _configurations["Authentication:SecretKey"];
-                if (string.IsNullOrEmpty(SecretKey)){ throw new ArgumentException($"{nameof(SecretKey)} must contain value."); };
-                byte[] jwtkey_byte_array = Encoding.UTF8.GetBytes(SecretKey);
-
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = _configurations["Authentication:Issuer"],
-                    ValidAudience = _configurations["Authentication:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(jwtkey_byte_array),
-                    ClockSkew = TimeSpan.Zero
-                };
-            });
-        services.AddAuthorization(options =>
-        {
-            options.AddPolicy("IsAdmin", policy => policy.RequireClaim("isAdmin"));
-        });
-
         // Add from ServiceCollectionExtension
+        services.AddApplicationDbContext(_configurations);
+        services.AddIdentityConfig();
+        services.AddControllersConfig();
+        services.AddSwaggerGenConfig();
         services.AddServices();
         services.AddRepositories();
         services.AddValidators();
+
+        //Configure Authentication with Bearer and JWT, and policies from ServiceCollectionExtension
+        services.AddAuthenticationConfig(_configurations);
+        services.AddAuthorizationConfig();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

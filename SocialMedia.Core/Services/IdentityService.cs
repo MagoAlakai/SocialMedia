@@ -44,29 +44,4 @@ public class IdentityService : IIdentityService
         AuthenticationResponseDTO authentication_response_dto = new() { ExpireDate = expire_date, Token = new JwtSecurityTokenHandler().WriteToken(security_token), UserCredentialsDTO = user_credentials_dto };
         return ValidatedResult<AuthenticationResponseDTO>.Passed(authentication_response_dto);
     }
-
-    //public byte[] CreateSalt()
-    //{
-    //    byte[] salt = new byte[16];
-    //    using (RandomNumberGenerator random = RandomNumberGenerator.Create())
-    //    {
-    //        random.GetBytes(salt);
-    //    }
-    //    return salt;
-    //}
-    //public HashResult Hash(string plain_text)
-    //{
-    //    byte[] salt = CreateSalt();
-    //    byte[] keyDerived = KeyDerivation.Pbkdf2(
-    //        password: plain_text,
-    //        salt: salt,
-    //        prf: KeyDerivationPrf.HMACSHA1,
-    //        iterationCount: 10000,
-    //        numBytesRequested: 32
-    //        );
-
-    //    string hash = Convert.ToBase64String(keyDerived);
-
-    //    return new HashResult() { Hash = hash, Salt = salt };
-    //}
 }

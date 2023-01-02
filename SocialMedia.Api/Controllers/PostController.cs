@@ -1,4 +1,9 @@
-﻿namespace SocialMedia.Api.Controllers;
+﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
+using SocialMedia.Core.Data;
+using System.Collections.Generic;
+
+namespace SocialMedia.Api.Controllers;
 
 [Route("api/[controller]")]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -23,16 +28,16 @@ public class PostController : ControllerBase
     /// <returns>A list of PostDTO</returns>
     [HttpGet]
     [AllowAnonymous]
-    public async Task<ActionResult<IEnumerable<PostDTO>>> GetPosts()
+    public async Task<ActionResult<ValidatedResult<IEnumerable<PostDTO>>>> GetPosts()
     {
         try
         {
-            IEnumerable<Post> result = await _postService.GetAsync();
-            if (result is null) { return BadRequest($"There are no posts registered yet"); }
+            ValidatedResult<IEnumerable<Post>> result = await _postService.GetAsync();
+            if (result.Success is false) { return BadRequest($"There are no posts registered yet"); }
 
-            List<PostDTO> post_dto_list = new(_mapper.Map<IEnumerable<PostDTO>>(result));
+            List<PostDTO> post_dto_list = new(_mapper.Map<IEnumerable<PostDTO>>(result.Value));
 
-            return StatusCode(200, post_dto_list);
+            return StatusCode(200, ValidatedResult<IEnumerable<PostDTO>>.Passed(post_dto_list));
         }
         catch (Exception ex)
         {
@@ -83,7 +88,6 @@ public class PostController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<PostDTO>> Post(CreatePostDTO create_post_dto)
     {
-
         //ValidationResult validation = await _validator.ValidateAsync(create_post_dto);
 
         //if (!validation.IsValid)
@@ -91,10 +95,13 @@ public class PostController : ControllerBase
         //    return BadRequest(validation.Errors);
         //}
 
-        //PostDTO? result = await _postService.PostAsync(create_post_dto);
+        //Post post = _mapper.Map<Post>(create_post_dto);
+        //Post? result = await _postService.PostAsync(post);
         //if (result is null) { return BadRequest($"This post is already registered"); }
 
-        //return Ok(result);
+        //PostDTO? post_dto = _mapper.Map<PostDTO>(result);
+
+        //return Ok(post_dto);
 
         try
         {

@@ -1,4 +1,6 @@
-﻿namespace SocialMedia.Infrastructure.Filters;
+﻿using Microsoft.Extensions.Logging;
+
+namespace SocialMedia.Infrastructure.Filters;
 
 public class GlobalExceptionFilter : IExceptionFilter
 {

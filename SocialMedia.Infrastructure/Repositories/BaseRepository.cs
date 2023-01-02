@@ -1,5 +1,12 @@
-﻿namespace SocialMedia.Infrastructure.Repositories;
+﻿using SocialMedia.Core.Data;
+using SocialMedia.Core.DTOs.Identity;
 
+namespace SocialMedia.Infrastructure.Repositories;
+
+/// <summary>
+/// Abstract implementation of the interface IRepository<typeparamref name="T"/><
+/// </summary>
+/// <typeparam name="T"></typeparam>
 public class BaseRepository<T> : IRepository<T> where T : BaseEntity
 {
     private readonly ApplicationDbContext _applicationDbContext;
@@ -14,7 +21,6 @@ public class BaseRepository<T> : IRepository<T> where T : BaseEntity
     public async Task<IEnumerable<T>> GetAsync()
     {
         IEnumerable<T> entities = await _entities.ToListAsync();
-        if (entities is null) { return new List<T>(); }
 
         return entities;
     }

@@ -1,5 +1,8 @@
 ﻿namespace SocialMedia.Infrastructure.Repositories.UnitOfWork;
 
+/// <summary>
+/// Centralize the use of the repositories
+/// </summary>
 public class UnitOfWork : IUnitOfWork
 {
     private readonly ApplicationDbContext _applicationDbContext;

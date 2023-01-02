@@ -9,6 +9,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<PostDTO, CreatePostDTO>();
         CreateMap<Post, CreatePostDTO>();
         CreateMap<Post, PostDTO>();
+        CreateMap<IEnumerable<Post>, IEnumerable<PostDTO>>();
         CreateMap<PostDTO, Post>();
         CreateMap<Post, PostWithUserAndCommentsDTO>();
         CreateMap<Post, PostSimplifiedDTO>();

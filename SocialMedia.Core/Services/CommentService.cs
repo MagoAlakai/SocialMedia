@@ -1,7 +1,4 @@
-﻿using SocialMedia.Core.DTOs.Comments;
-using SocialMedia.Core.Entities;
-
-namespace SocialMedia.Core.Services;
+﻿namespace SocialMedia.Core.Services;
 
 public class CommentService : ICommentService
 {
@@ -11,9 +8,12 @@ public class CommentService : ICommentService
     {
         _unitOfWork = unitOfWork;
     }
-    public async Task<IEnumerable<Comment>> GetAsync()
+    public async Task<ValidatedResult<IEnumerable<Comment>>> GetAsync()
     {
-        return await _unitOfWork.commentRepository.GetAsync();
+        IEnumerable<Comment>? result = await _unitOfWork.commentRepository.GetAsync();
+        if (result is null) { return ValidatedResult<IEnumerable<Comment>>.Failed(0, "There are no Comments registered"); }
+
+        return ValidatedResult<IEnumerable<Comment>>.Passed(result);
     }
 
     public async Task<Comment?> GetByIdAsync(int id)
