@@ -1,4 +1,6 @@
-﻿namespace SocialMedia.Core.Services;
+﻿using SocialMedia.Core.Entities;
+
+namespace SocialMedia.Core.Services;
 
 public class CommentService : ICommentService
 {
@@ -16,48 +18,48 @@ public class CommentService : ICommentService
         return ValidatedResult<IEnumerable<Comment>>.Passed(result);
     }
 
-    public async Task<Comment?> GetByIdAsync(int id)
+    public async Task<ValidatedResult<Comment>> GetByIdAsync(int id)
     {
         Comment? comment = await _unitOfWork.commentRepository.GetByIdAsync(id);
-        if (comment is null) { return new Comment(); }
+        if (comment is null) { return ValidatedResult<Comment>.Failed(0, "This Comment is not registered"); }
 
         Post? post = await _unitOfWork.postRepository.GetByIdAsync(comment.PostId);
-        if (post is null) { return new Comment(); }
+        if (post is null) { return ValidatedResult<Comment>.Failed(0, "This Comment has no Post associated"); }
 
         User? user = await _unitOfWork.userRepository.GetByIdAsync(comment.UserId);
-        if (user is null) { return new Comment(); }
+        if (user is null) { return ValidatedResult<Comment>.Failed(0, "This Comment has no User associated"); }
 
         comment.User = user;
         comment.Post = post;
 
-        return comment;
+        return ValidatedResult<Comment>.Passed(comment);
     }
 
-    public async Task<Comment?> PostAsync(Comment create_comment)
+    public async Task<ValidatedResult<Comment>> PostAsync(Comment create_comment)
     {
         Comment? comment = await _unitOfWork.commentRepository.PostAsync(create_comment);
-        if (comment is null) { return null; }
+        if (comment is null) { return ValidatedResult<Comment>.Failed(0, "This Comment is not registered"); }
 
         await _unitOfWork.SaveChangesAsync();
 
-        return comment;
+        return ValidatedResult<Comment>.Passed(comment); ;
     }
 
-    public async Task<Comment?> UpdateAsync(Comment update_comment, int id)
+    public async Task<ValidatedResult<Comment>> UpdateAsync(Comment update_comment, int id)
     {
         Comment? comment = await _unitOfWork.commentRepository.UpdateAsync(update_comment, id);
-        if (comment is null) { return null; }
+        if (comment is null) { return ValidatedResult<Comment>.Failed(0, "This Comment is not registered"); }
 
         await _unitOfWork.SaveChangesAsync();
 
-        return comment;
+        return ValidatedResult<Comment>.Passed(comment);
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<ValidatedResult<bool>> DeleteAsync(int id)
     {
         bool deleted = await _unitOfWork.commentRepository.DeleteAsync(id);
         await _unitOfWork.SaveChangesAsync();
 
-        return deleted;
+        return ValidatedResult<bool>.Passed(deleted); ;
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace SocialMedia.Core.Services;
+﻿using SocialMedia.Core.Entities;
+
+namespace SocialMedia.Core.Services;
 
 public class UserService : IUserService
 {
@@ -17,10 +19,10 @@ public class UserService : IUserService
         return ValidatedResult<IEnumerable<User>>.Passed(result);
     }
 
-    public async Task<User?> GetByIdAsync(int id)
+    public async Task<ValidatedResult<User>> GetByIdAsync(int id)
     {
         User? user = await _unitOfWork.userRepository.GetByIdAsync(id);
-        if (user is null) { return new User(); }
+        if (user is null) { return ValidatedResult<User>.Failed(0, "This User is not registered"); }
 
         List<Post> posts = new();
         posts = _unitOfWork.postRepository.GetAsync().Result
@@ -53,34 +55,34 @@ public class UserService : IUserService
         user.Posts = posts;
         user.Comments = comments;
 
-        return await _unitOfWork.userRepository.GetByIdAsync(id);
+        return ValidatedResult<User>.Passed(user);
     }
 
-    public async Task<User?> PostAsync(User create_user)
+    public async Task<ValidatedResult<User>> PostAsync(User create_user)
     {
         User? user = await _unitOfWork.userRepository.PostAsync(create_user);
-        if (user is null) { return null; }
+        if (user is null) { return ValidatedResult<User>.Failed(0, "This User has not been registered"); }
 
         await _unitOfWork.SaveChangesAsync();
 
-        return user;
+        return ValidatedResult<User>.Passed(user);
     }
 
-    public async Task<User?> UpdateAsync(User create_user, int id)
+    public async Task<ValidatedResult<User>> UpdateAsync(User create_user, int id)
     {
         User? user = await _unitOfWork.userRepository.UpdateAsync(create_user, id);
-        if (user is null) { return null; }
+        if (user is null) { return ValidatedResult<User>.Failed(0, "This User is not registered"); }
 
         await _unitOfWork.SaveChangesAsync();
 
-        return user;
+        return ValidatedResult<User>.Passed(user);
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<ValidatedResult<bool>> DeleteAsync(int id)
     {
         bool deleted = await _unitOfWork.userRepository.DeleteAsync(id);
         await _unitOfWork.SaveChangesAsync();
 
-        return deleted;
+        return ValidatedResult<bool>.Passed(deleted) ;
     }
 }

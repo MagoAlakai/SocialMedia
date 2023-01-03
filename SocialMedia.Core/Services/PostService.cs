@@ -23,7 +23,7 @@ public class PostService : IPostService
         if (post is null) { return ValidatedResult<Post>.Failed(0, "This Post is not registered"); }
 
         User? user = await _unitOfWork.userRepository.GetByIdAsync(post.UserId);
-        if (user is null) { return ValidatedResult<Post>.Failed(0, "This Post has no user "); }
+        if (user is null) { return ValidatedResult<Post>.Failed(0, "This Post has no User"); }
 
         List<Comment> comments = new();
         comments = _unitOfWork.commentRepository.GetAsync().Result

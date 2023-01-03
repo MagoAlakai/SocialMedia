@@ -1,5 +1,4 @@
 ﻿using SocialMedia.Core.Data;
-using System.Collections.Generic;
 
 namespace SocialMedia.Api.Controllers;
 
@@ -31,7 +30,7 @@ public class CommentController : ControllerBase
         try
         {
             ValidatedResult<IEnumerable<Comment>> result = await _commentService.GetAsync();
-            if (result.Success is false) { return BadRequest($"There are no comments registered yet"); }
+            if (result.Success is false || result.Value is null) { return ValidatedResult<IEnumerable<CommentDTO>>.Failed(0, $"There are no comments registered yet"); }
 
             List<CommentDTO> comment_dto_list = new(_mapper.Map<IEnumerable<CommentDTO>>(result));
 
@@ -39,7 +38,7 @@ public class CommentController : ControllerBase
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex));
+            return BadRequest(ValidatedResult<IEnumerable<CommentDTO>>.Failed(0, ex.Message));
         }
     }
 
@@ -51,27 +50,27 @@ public class CommentController : ControllerBase
     /// <returns>A CommentWithUserAndPostDTO</returns>
     [HttpGet("{id:int}")]
     [AllowAnonymous]
-    public async Task<ActionResult<CommentWithUserAndPostDTO>> GetById(int id)
+    public async Task<ActionResult<ValidatedResult<CommentWithUserAndPostDTO>>> GetById(int id)
     {
         try
         {
-            Comment? result = await _commentService.GetByIdAsync(id);
-            if (result is null) { return BadRequest($"This comment is not registered"); }
+            ValidatedResult<Comment> result = await _commentService.GetByIdAsync(id);
+            if (result.Success is false || result.Value is null) { return ValidatedResult<CommentWithUserAndPostDTO>.Failed(0, $"This comment is not registered"); }
 
-            UserSimplifiedDTO user_dto = _mapper.Map<UserSimplifiedDTO>(result.User);
-            PostSimplifiedDTO post_dto = _mapper.Map<PostSimplifiedDTO>(result.Post);
+            UserSimplifiedDTO user_dto = _mapper.Map<UserSimplifiedDTO>(result.Value.User);
+            PostSimplifiedDTO post_dto = _mapper.Map<PostSimplifiedDTO>(result.Value.Post);
 
-            CommentWithUserAndPostDTO comment_with_user_and_post_dto = _mapper.Map<Comment, CommentWithUserAndPostDTO>(result, options =>
+            CommentWithUserAndPostDTO comment_with_user_and_post_dto = _mapper.Map<Comment, CommentWithUserAndPostDTO>(result.Value, options =>
                    options.AfterMap((src, dest) => {
                        dest.User = user_dto;
                        dest.Post = post_dto;
                    }));
 
-            return StatusCode(200, comment_with_user_and_post_dto);
+            return StatusCode(200, ValidatedResult<CommentWithUserAndPostDTO>.Passed(comment_with_user_and_post_dto));
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex));
+            return BadRequest(ValidatedResult<CommentWithUserAndPostDTO>.Failed(0, ex.Message));
         }
     }
 
@@ -82,7 +81,7 @@ public class CommentController : ControllerBase
     /// <remarks>POST https://localhost:7022/api/comment/</remarks>
     /// <returns>A StatusCode and a CommentDTO</returns>
     [HttpPost]
-    public async Task<ActionResult<CommentDTO>> Post(CreateCommentDTO create_comment_dto)
+    public async Task<ActionResult<ValidatedResult<CommentDTO>>> Post(CreateCommentDTO create_comment_dto)
     {
         try
         {
@@ -94,16 +93,16 @@ public class CommentController : ControllerBase
             }
 
             Comment comment = _mapper.Map<Comment>(create_comment_dto);
-            Comment? result = await _commentService.PostAsync(comment);
-            if (result is null) { return BadRequest($"This comment is already registered"); }
+            ValidatedResult<Comment> result = await _commentService.PostAsync(comment);
+            if (result.Success is false || result.Value is null) { return ValidatedResult<CommentDTO>.Failed(0, $"This Comment is already registered"); }
 
-            CommentDTO? comment_dto = _mapper.Map<CommentDTO>(result);
+            CommentDTO? comment_dto = _mapper.Map<CommentDTO>(result.Value);
 
-            return StatusCode(200, comment_dto);
+            return StatusCode(200, ValidatedResult<CommentDTO>.Passed(comment_dto));
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex));
+            return BadRequest(ValidatedResult<CommentDTO>.Failed(0, ex.Message));
         }
     }
 
@@ -115,7 +114,7 @@ public class CommentController : ControllerBase
     /// <remarks>PUT https://localhost:7022/api/comment/{id}</remarks>
     /// <returns>A StatusCode and a CommentDTO</returns>
     [HttpPut("{id:int}")]
-    public async Task<ActionResult<CommentDTO>> Update(CreateCommentDTO update_comment_dto, int id)
+    public async Task<ActionResult<ValidatedResult<CommentDTO>>> Update(CreateCommentDTO update_comment_dto, int id)
     {
         try
         {
@@ -127,16 +126,16 @@ public class CommentController : ControllerBase
             }
 
             Comment comment = _mapper.Map<Comment>(update_comment_dto);
-            Comment? result = await _commentService.UpdateAsync(comment, id);
-            if (result is null) { return BadRequest($"This post is not registered"); }
+            ValidatedResult<Comment> result = await _commentService.UpdateAsync(comment, id);
+            if (result.Success is false || result.Value is null) { return ValidatedResult<CommentDTO>.Failed(0, "This Comment is not registered"); }
 
-            CommentDTO? comment_dto = _mapper.Map<CommentDTO>(result);
+            CommentDTO? comment_dto = _mapper.Map<CommentDTO>(result.Value);
 
-            return StatusCode(200, result);
+            return StatusCode(200, ValidatedResult<CommentDTO>.Passed(comment_dto));
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex));
+            return BadRequest(ValidatedResult<CommentDTO>.Failed(0, ex.Message));
         }
     }
 
@@ -147,18 +146,18 @@ public class CommentController : ControllerBase
     /// <remarks>DELETE https://localhost:7022/api/comment/{id}</remarks>
     /// <returns>A boolean</returns>
     [HttpDelete("{id:int}")]
-    public async Task<ActionResult<bool>> Delete(int id)
+    public async Task<ActionResult<ValidatedResult<bool>>> Delete(int id)
     {
         try
         {
-            bool result = await _commentService.DeleteAsync(id);
-            if (result is false) { return BadRequest($"This comment is not registered"); }
+            ValidatedResult<bool> result = await _commentService.DeleteAsync(id);
+            if (result.Success is false || result.Value is false) { return ValidatedResult<bool>.Failed(0, "This comment is not registered"); }
 
-            return StatusCode(200, result);
+            return StatusCode(200, ValidatedResult<bool>.Passed(result.Value));
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex.Message));
+            return BadRequest(ValidatedResult<bool>.Failed(0, ex.Message));
         }
     }
 }
