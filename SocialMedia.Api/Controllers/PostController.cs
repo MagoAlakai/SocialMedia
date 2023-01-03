@@ -1,9 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.Extensions.Logging;
-using SocialMedia.Core.Data;
-using System.Collections.Generic;
-
-namespace SocialMedia.Api.Controllers;
+﻿namespace SocialMedia.Api.Controllers;
 
 [Route("api/[controller]")]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -33,9 +28,7 @@ public class PostController : ControllerBase
         try
         {
             ValidatedResult<IEnumerable<Post>> result = await _postService.GetAsync();
-            if (result.Success is false) { return BadRequest($"There are no posts registered yet"); }
-
-            //List<PostDTO> post_dto_list = new(_mapper.Map<IEnumerable<PostDTO>>(result.Value));
+            if (result.Success is false || result.Value is null) { return ValidatedResult<IEnumerable<PostDTO>>.Failed(0, $"There are no posts registered yet"); }
 
             List<PostDTO> post_dto_list = new();
             foreach (Post post in result.Value)
@@ -48,7 +41,7 @@ public class PostController : ControllerBase
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex));
+            return BadRequest(ValidatedResult<IEnumerable<PostDTO>>.Failed(0,ex.Message));
         }
     }
 
@@ -60,29 +53,29 @@ public class PostController : ControllerBase
     /// <returns>A PostDTO</returns>
     [HttpGet("{id:int}")]
     [AllowAnonymous]
-    public async Task<ActionResult<PostWithUserAndCommentsDTO>> GetById(int id)
+    public async Task<ActionResult<ValidatedResult<PostWithUserAndCommentsDTO>>> GetById(int id)
     {
         try
         {
-            Post? result = await _postService.GetByIdAsync(id);
-            if (result is null) { return BadRequest($"This post is not registered"); }
+            ValidatedResult<Post> result = await _postService.GetByIdAsync(id);
+            if (result.Success is false || result.Value is null) { return ValidatedResult< PostWithUserAndCommentsDTO>.Failed(0, $"This post is not registered"); }
 
-            UserSimplifiedDTO user_dto = _mapper.Map<UserSimplifiedDTO>(result.User);
+            UserSimplifiedDTO user_dto = _mapper.Map<UserSimplifiedDTO>(result.Value.User);
 
-            List<CommentSimplifiedDTO> comments_dto = _mapper.Map<List<CommentSimplifiedDTO>>(result.Comments);
+            List<CommentSimplifiedDTO> comments_dto = _mapper.Map<List<CommentSimplifiedDTO>>(result.Value.Comments);
 
-            PostWithUserAndCommentsDTO post_with_user_dto = _mapper.Map<Post, PostWithUserAndCommentsDTO>(result, options =>
+            PostWithUserAndCommentsDTO post_with_user_dto = _mapper.Map<Post, PostWithUserAndCommentsDTO>(result.Value, options =>
                    options.AfterMap((src, dest) =>
                    {
                        dest.User = user_dto;
                        dest.Comments = comments_dto;
                    }));
 
-            return StatusCode(200, post_with_user_dto);
+            return StatusCode(200, ValidatedResult<PostWithUserAndCommentsDTO>.Passed(post_with_user_dto));
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex));
+            return BadRequest(ValidatedResult<PostWithUserAndCommentsDTO>.Failed(0, ex.Message));
         }
     }
 
@@ -93,23 +86,8 @@ public class PostController : ControllerBase
     /// <remarks>POST https://localhost:7022/api/post/</remarks>
     /// <returns>A StatusCode and the PostDTO</returns>
     [HttpPost]
-    public async Task<ActionResult<PostDTO>> Post(CreatePostDTO create_post_dto)
+    public async Task<ActionResult<ValidatedResult<PostDTO>>> Post(CreatePostDTO create_post_dto)
     {
-        //ValidationResult validation = await _validator.ValidateAsync(create_post_dto);
-
-        //if (!validation.IsValid)
-        //{
-        //    return BadRequest(validation.Errors);
-        //}
-
-        //Post post = _mapper.Map<Post>(create_post_dto);
-        //Post? result = await _postService.PostAsync(post);
-        //if (result is null) { return BadRequest($"This post is already registered"); }
-
-        //PostDTO? post_dto = _mapper.Map<PostDTO>(result);
-
-        //return Ok(post_dto);
-
         try
         {
             ValidationResult validation = await _validator.ValidateAsync(create_post_dto);
@@ -120,16 +98,16 @@ public class PostController : ControllerBase
             }
 
             Post post = _mapper.Map<Post>(create_post_dto);
-            Post? result = await _postService.PostAsync(post);
-            if (result is null) { return BadRequest($"This post is already registered"); }
+            ValidatedResult<Post> result = await _postService.PostAsync(post);
+            if (result.Success is false || result.Value is null) { return ValidatedResult<PostDTO>.Failed(0, $"This post is already registered"); }
 
-            PostDTO? post_dto = _mapper.Map<PostDTO>(result);
+            PostDTO? post_dto = _mapper.Map<PostDTO>(result.Value);
 
-            return StatusCode(200, post_dto);
+            return StatusCode(200, ValidatedResult<PostDTO>.Passed(post_dto));
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex));
+            return BadRequest(ValidatedResult<PostDTO>.Failed(0, ex.Message));
         }
     }
 
@@ -141,7 +119,7 @@ public class PostController : ControllerBase
     /// <remarks>PUT https://localhost:7022/api/post/{id}</remarks>
     /// <returns>A StatusCode and the PostDTO</returns>
     [HttpPut("{id:int}")]
-    public async Task<ActionResult<PostDTO>> Update(CreatePostDTO update_post_dto, int id)
+    public async Task<ActionResult<ValidatedResult<PostDTO>>> Update(CreatePostDTO update_post_dto, int id)
     {
         try
         {
@@ -153,16 +131,16 @@ public class PostController : ControllerBase
             }
 
             Post? post = _mapper.Map<Post>(update_post_dto);
-            Post? result = await _postService.UpdateAsync(post, id);
-            if (result is null) { return BadRequest($"This post is not registered"); }
+            ValidatedResult<Post> result = await _postService.UpdateAsync(post, id);
+            if (result.Success is false || result.Value is null) { return ValidatedResult<PostDTO>.Failed(0, $"This post is not registered"); }
 
-            PostDTO? post_dto = _mapper.Map<PostDTO>(result);
+            PostDTO? post_dto = _mapper.Map<PostDTO>(result.Value);
 
-            return StatusCode(200, post_dto);
+            return StatusCode(200, ValidatedResult<PostDTO>.Passed(post_dto));
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex));
+            return BadRequest(ValidatedResult<PostDTO>.Failed(0, ex.Message));
         }
     }
 
@@ -173,18 +151,18 @@ public class PostController : ControllerBase
     /// <remarks>DELETE https://localhost:7022/api/post/{id}</remarks>
     /// <returns>A boolean</returns>
     [HttpDelete("{id:int}")]
-    public async Task<ActionResult<bool>> Delete(int id)
+    public async Task<ActionResult<ValidatedResult<bool>>> Delete(int id)
     {
         try
         {
-            bool result = await _postService.DeleteAsync(id);
-            if (result is false) { return BadRequest($"This post is not registered"); }
+            ValidatedResult<bool> result = await _postService.DeleteAsync(id);
+            if (result.Success is false || result.Value is false) { return ValidatedResult<bool>.Failed(0, $"This post is not registered"); }
 
             return StatusCode(200, result);
         }
         catch (Exception ex)
         {
-            return await Task.FromResult(BadRequest(ex));
+            return BadRequest(ValidatedResult<bool>.Failed(0, ex.Message));
         }
     }
 }

@@ -1,7 +1,4 @@
-﻿using SocialMedia.Core.Data;
-using SocialMedia.Core.DTOs.Identity;
-
-namespace SocialMedia.Infrastructure.Repositories;
+﻿namespace SocialMedia.Infrastructure.Repositories;
 
 /// <summary>
 /// Abstract implementation of the interface IRepository<typeparamref name="T"/><
@@ -44,8 +41,8 @@ public class BaseRepository<T> : IRepository<T> where T : BaseEntity
         bool entity_exist = await _entities.AnyAsync(x => x.Id == id);
         if (entity_exist is false) { return null; }
 
+        entity.Id = id;
         T entity_updated = _entities.Update(entity).Entity;
-        entity_updated.Id = id;
 
         return await Task.FromResult(entity_updated);
     }
