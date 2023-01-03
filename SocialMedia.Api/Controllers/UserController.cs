@@ -29,7 +29,7 @@ public class UserController : ControllerBase
             ValidatedResult<IEnumerable<User>> result = await _userService.GetAsync();
             if (result.Success is false || result.Value is null) { return ValidatedResult<IEnumerable<UserDTO>>.Failed(0, $"There are no users registered yet"); }
 
-            List<UserDTO> user_dto_list = new(_mapper.Map<IEnumerable<UserDTO>>(result));
+            List<UserDTO> user_dto_list = new(_mapper.Map<IEnumerable<UserDTO>>(result.Value));
 
             return StatusCode(200, ValidatedResult<IEnumerable<UserDTO>>.Passed(user_dto_list));
         }

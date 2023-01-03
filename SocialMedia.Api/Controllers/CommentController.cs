@@ -1,6 +1,4 @@
-﻿using SocialMedia.Core.Data;
-
-namespace SocialMedia.Api.Controllers;
+﻿namespace SocialMedia.Api.Controllers;
 
 [Route("api/comment")]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -32,7 +30,7 @@ public class CommentController : ControllerBase
             ValidatedResult<IEnumerable<Comment>> result = await _commentService.GetAsync();
             if (result.Success is false || result.Value is null) { return ValidatedResult<IEnumerable<CommentDTO>>.Failed(0, $"There are no comments registered yet"); }
 
-            List<CommentDTO> comment_dto_list = new(_mapper.Map<IEnumerable<CommentDTO>>(result));
+            List<CommentDTO> comment_dto_list = new(_mapper.Map<IEnumerable<CommentDTO>>(result.Value));
 
             return StatusCode(200, ValidatedResult<IEnumerable<CommentDTO>>.Passed(comment_dto_list));
         }
