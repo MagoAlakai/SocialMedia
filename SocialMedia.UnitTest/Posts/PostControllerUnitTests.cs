@@ -7,6 +7,8 @@ public class PostControllerUnitTests
     private readonly Mock<IUnitOfWork> _unit;
     private readonly Fixture _fixture;
     private PostService? _postService;
+    private UserService? _userService;
+
 
     public PostControllerUnitTests()
     {
@@ -62,5 +64,77 @@ public class PostControllerUnitTests
         Assert.IsNull(result.Value.Value);
         Assert.AreEqual(result.Value.FailureMessage, "There are no Posts registered");
         Assert.AreEqual(false, result.Value.Success);
+    }
+
+    [TestMethod]
+    public async Task GetPostByIdToSuccess()
+    {
+        //Arrange
+        _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+        Post post = _fixture.Create<Post>();
+
+        _unit.Setup(repo => repo.postRepository.GetByIdAsync(post.Id)).ReturnsAsync(post);
+        _unit.Setup(repo => repo.userRepository.GetByIdAsync(post.UserId)).ReturnsAsync(post.User);
+        _unit.Setup(repo => repo.commentRepository.GetAsync()).ReturnsAsync(post.Comments);
+
+        _postService = new PostService(_unit.Object);
+
+        //Act
+        ValidatedResult<Post> result = await _postService.GetByIdAsync(post.Id);
+        ConsoleWriteObject("Result", result);
+
+        //Assert
+        Assert.IsNotNull(result.Value);
+        Assert.AreEqual(true, result.Success);
+    }
+
+    [TestMethod]
+    public async Task GetPostByIdToFailure()
+    {
+        //Arrange
+        _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+        Post post = _fixture.Create<Post>();
+        Random rnd = new Random();
+        int id = rnd.Next(1, 200);
+
+        _unit.Setup(repo => repo.postRepository.GetByIdAsync(post.Id)).ReturnsAsync(post);
+        _unit.Setup(repo => repo.userRepository.GetByIdAsync(id)).ReturnsAsync(post.User);
+        _unit.Setup(repo => repo.commentRepository.GetAsync()).ReturnsAsync(post.Comments);
+
+        _postService = new PostService(_unit.Object);
+
+        //Act
+        ValidatedResult<Post> result = await _postService.GetByIdAsync(post.Id);
+        ConsoleWriteObject("Result", result);
+
+        //Assert
+        Assert.IsNull(result.Value);
+        Assert.AreEqual(result.FailureMessage, "This Post has no User");
+        Assert.AreEqual(false, result.Success);
+    }
+
+    [TestMethod]
+    public async Task PostPostToSuccess()
+    {
+        //Arrange
+        _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+        Post post = _fixture.Create<Post>();
+        User? user = post.User;
+
+        _unit.Setup(repo => repo.userRepository.PostAsync(user)).ReturnsAsync(user);
+        _unit.Setup(repo => repo.postRepository.PostAsync(post)).ReturnsAsync(post);
+
+        _postService = new PostService(_unit.Object);
+
+        //Act
+        ValidatedResult<Post> result = await _postService.PostAsync(post);
+        ConsoleWriteObject("Result", result);
+
+        //Assert
+        Assert.IsNotNull(result.Value);
+        Assert.AreEqual(true, result.Success);
     }
 }

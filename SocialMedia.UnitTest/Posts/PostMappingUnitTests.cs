@@ -1,8 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Infrastructure.Mapping.Posts;
-using SocialMedia.Infrastructure.Validators.Posts;
+﻿namespace SocialMedia.UnitTest.Posts;
 
-namespace SocialMedia.UnitTest.Posts;
 [TestClass]
 public class PostMappingUnitTests
 {

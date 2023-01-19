@@ -48,10 +48,10 @@ public class PostService : IPostService
     public async Task<ValidatedResult<Post>> PostAsync(Post create_post)
     {
         User? user = await _unitOfWork.userRepository.GetByIdAsync(create_post.UserId);
-        if (user is null)
-        {
-            throw new BusinessException("User does not exist");
-        }
+        //if (user is null)
+        //{
+        //    throw new BusinessException("User does not exist");
+        //}
 
         Post? post = await _unitOfWork.postRepository.PostAsync(create_post);
         if (post is null) { return ValidatedResult<Post>.Failed(0, "This Post has not been registered"); }
